@@ -1,0 +1,126 @@
+/*******************************
+Corona-Verify Styles
+********************************/
+
+div {
+    margin-bottom: 10px;
+}
+
+.editMembers{
+    display:grid;
+    margin-top: 10px;
+}
+.debug{
+    font-size: 20px;
+    color:red;
+    padding: 10px;
+    margin:10px;
+}
+  
+.corona-verify-form {
+    padding: 30px;
+    display: block;
+    border: 1px solid #ccc;
+    font-family: arial;
+    font-size: 12px
+}
+
+.paragraf {
+    font-size: .5em;
+    font-weight: normal;
+}
+
+.name {
+    padding: 10px;
+    ;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.greenBackground {
+    font-size: 1.3em;
+    padding: 10px;
+    background-color: green;
+    color: white;
+}
+
+.corna-verify-heading {
+    display: block;
+    font-family: arial;
+    font-weight: 700;
+    font-size: 24px;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.qr {
+    text-align: center;
+    margin: 10px;
+    padding: 20px;
+}
+
+.ergebnis {
+    margin: auto;
+}
+
+.positiv {
+    display: grid;
+}
+
+.negativ {
+    display: grid;
+}
+
+.aktuellesDatum {
+    font-size: .5em;
+}
+
+.negativ:before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f058";
+    font-size: 6.0em;
+    color: green;
+}
+
+.positiv:before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f057";
+    font-size: 6.0em;
+    color: red;
+}
+
+.expired {
+    display: grid;
+}
+
+.expired:before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f256";
+    font-size: 6.0em;
+    color: red;
+}
+
+.corona-verify-form .button {
+    background: #ccc none repeat scroll 0 0;
+    border: 1px solid #ccc;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-size: 15px;
+    font-family: arial;
+    padding: 10px 20px;
+}
+
+.corona-verify-form .button:hover {
+    background: #000 none repeat scroll 0 0;
+    border: 1px solid #000;
+    border-radius: 0;
+    padding: 10px 20px;
+}
+
+.corona-registration-form .error {
+    color: red;
+    margin-bottom: 18px;
+}
