@@ -96,7 +96,7 @@ class MembersTable extends WP_List_Table
           <input typ="text" name="email3" id="email3" value="'.esc_html($item['email3']).'">
         </div>
         <div class="divCell" style="display:flex;">
-          <button style=" cursor:pointer;" type="submit" name="submit" onclick="return confirm(\'Möchtest du den Eintrag wirklich löschen?\');" >speichern</button>
+          <button style=" cursor:pointer;" type="submit" name="submit">speichern</button>
         </div>
       </div>
     </form>
@@ -203,7 +203,7 @@ class MembersTable extends WP_List_Table
           <input typ="text" name="email3" id="email3" value="">
         </div>
         <div class="divCell" style="display:flex;">
-          <button style=" cursor:pointer;" type="submit" name="addMember" onclick="return confirm(\'Möchtest du den Eintrag wirklich löschen?\');">speichern</button>
+          <button style=" cursor:pointer;" type="submit" name="addMember">speichern</button>
         </div>
       </div>
     </form>
@@ -219,6 +219,8 @@ class MembersTable extends WP_List_Table
 
     if(null!=$id && strlen($id) == 6){
       MC_DB::insertMember($id, $anrede, $vorname, $nachname, $email2, $email3);
+    }else{
+      echo 'Mitgliedsnummer nicht lang genug';
     }
   }
    return $html;

@@ -16,12 +16,12 @@ jQuery(document).ready(function($){
         return false;
     });
 
-    function confirmationDelete(){
+    function checkMitgliederNumber(){
         var del=confirm("Are you sure you want to delete this record?");
         if (del==true){
             alert ("record deleted")
         }
         return del;
-        }
+    }
 
 }); 
