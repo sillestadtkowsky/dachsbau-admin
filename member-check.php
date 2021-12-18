@@ -5,11 +5,11 @@ ob_start();
  *
  * Plugin Name:       member-check
  * Plugin URI:        https://plugins-wordpress-osowsky-webdesign.info
- * Description:       Prüft beim Buchen eines Kurse auf eine gültige Mitgliedsnummer und lässte das aktualisieren der Mitgliedsnummern im Admin Bereich zu.
- * Version:           1.0.2
+ * Description:       Prüft beim Buchen eines Kurse auf eine gültige Mitgliedsnummer und lässte das aktualisieren der Mitgliedinformationen im Admin Bereich zu.
+ * Version:           1.1.0
  * Requires at least: 5.8.2
  * Requires PHP:      7.2
- * Author:            Silvio Osowsky
+ * Author:            Silvio Osowsky <i class="fas fa-heart"></i>
  * Author URI:        https://osowsky-webdesign.de
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html

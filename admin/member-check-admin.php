@@ -30,12 +30,16 @@ function member_checker_home()
   }
 
   $myListTable = new MembersTable();
-  echo '<div class="wrap"><h3>Mitgliederliste</h3>';
+  echo '<div class="wrap">';
 
   $requestPage = sanitize_text_field($_REQUEST["page"]);
   $html = '';
   $html .=  '<form id="events-filter" method="get"><input type="hidden" name="page" value="' . sanitize_text_field($requestPage) . '" />';
   $myListTable->prepare_items(); 
+  echo '<form method="post">
+   <input type="hidden" name="page" value="wp_list_table_class" />';
+  $myListTable->search_box('Finden', 'search');
+  echo '</form><h3>Mitgliederliste</h3>';
   
   $myListTable->display(); 
   $html .= '</form></div></div>'; 

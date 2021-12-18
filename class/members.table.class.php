@@ -27,6 +27,7 @@ class MembersTable extends WP_List_Table
     echo '<input type="button" id="cancelNewMember" class="button action" value="abbrechen">';
     echo $this->newFields();
 }
+ 
 
   function prepare_items($search ='')
   {
@@ -42,9 +43,13 @@ class MembersTable extends WP_List_Table
     );
 
     $search = ( isset($_REQUEST['s']) ) ? sanitize_text_field($_REQUEST['s']) : false;
-    $do_search = ( $search ) ? $wpdb->prepare(" post_content LIKE '%%%s%%' ", $search ) : '';
+    $do_search = '';
+    
+    if(null!=$search){
+      $do_search .= ( $search ) ? $wpdb->prepare(" WHERE mitglNr LIKE '%%%s%%' OR vorname LIKE '%%%s%%' or nachname LIKE '%%%s%%' or email2 LIKE '%%%s%%' or email3 LIKE '%%%s%%'", $search , $search, $search, $search, $search) : '';
+    }
 
-    $data = MC_DB::getMembersArray();
+    $data = MC_DB::getMembersArray($do_search);
 
     $per_page = 10;
     $current_page = $this->get_pagenum();

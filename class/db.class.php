@@ -44,7 +44,7 @@ class MC_DB
 		$result = $wpdb->get_results($query);
 	}
 
-	public static function getMembersArray()
+	public static function getMembersArray($where)
 	{
 		global $wpdb;
 		$query = '';
@@ -52,9 +52,11 @@ class MC_DB
 		$query .=
 			'SELECT members.mitglNr as mitgliedsnummer, members.anrede, members.vorname, members.nachname, members.email2, members.email3 , members.abteilung
 		FROM 
-			' . $wpdb->prefix . 'mitglieder as members
+			' . $wpdb->prefix . 'mitglieder as members'
+		. $where . '	
 		ORDER BY
-			members.mitglNr';
+		members.mitglNr';
+
 
 		$result = $wpdb->get_results($query, ARRAY_A);
 		return esc_sql($result);
