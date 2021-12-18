@@ -3,6 +3,7 @@ jQuery(document).ready(function($){
     
     $(".editMembers").css("display", "none");
     $(".newMember").css("display", "none");
+    $("#cancelNewMember").css("display", "none");
 
     $(".editMember").click(function() {
         var id = $(this).attr('data-categoryid');   
@@ -13,6 +14,17 @@ jQuery(document).ready(function($){
     $("#newMember").click(function() {
         var id = $(this).attr('data-categoryid');   
         $(".newMember").show();
+        $("#cancelNewMember").css("display", "block");
+        $("#newMember").css("display", "none");
+        return false;
+    });
+
+    $("#cancelNewMember").click(function() {
+        var id = $(this).attr('data-categoryid');   
+        $(".newMember").show();
+        $("#cancelNewMember").css("display", "none");
+        $(".newMember").css("display", "none");
+        $("#newMember").css("display", "block");
         return false;
     });
 

@@ -24,6 +24,7 @@ class MembersTable extends WP_List_Table
       return;
     }
     echo '<input type="button" id="newMember" class="button action" value="Neues Mitglied">';
+    echo '<input type="button" id="cancelNewMember" class="button action" value="abbrechen">';
     echo $this->newFields();
 }
 
@@ -97,6 +98,7 @@ class MembersTable extends WP_List_Table
         </div>
         <div class="divCell" style="display:flex;">
           <button style=" cursor:pointer;" type="submit" name="submit">speichern</button>
+          <button style=" cursor:pointer;" type="submit" name="cancelEditMember">abbrechen</button>
         </div>
       </div>
     </form>
