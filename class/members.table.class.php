@@ -76,7 +76,7 @@ class MembersTable extends WP_List_Table
     $edit_nonce = wp_create_nonce( 'edit_member' );
     $actions = array(
       'bearbeiten'    => '<a href="#" class="editMember" data-categoryid="'. esc_html($item['mitgliedsnummer']) .'">Bearbeiten</a>',
-      'löschen'    => sprintf('<a onclick="return confirm(\'Möchtest du den Eintrag wirklich löschen?\');" href="?page=%s&action=%s&mitgliedsnummer[]=%s&_wpnonce=%s">löschen</a>', '' . sanitize_text_field($_REQUEST["page"]) . '', 'delete', esc_html($item['mitgliedsnummer']), sanitize_text_field($edit_nonce))
+      'löschen'    => sprintf('<a onclick="return confirm(\'Möchtest du den Eintrag wirklich löschen?\');" href="?page=member-checker-menu&action=%s&mitgliedsnummer[]=%s&_wpnonce=%s">löschen</a>', 'delete', esc_html($item['mitgliedsnummer']), sanitize_text_field($edit_nonce))
     );
 
     $html='';
