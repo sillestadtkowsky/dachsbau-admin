@@ -93,12 +93,6 @@ function member_checker_home()
   ?>
   <div class="wrap">
       <h1>Mitgliederübersicht</h1>
-      <form enctype="multipart/form-data" method="post">
-          <input type="hidden" name="action" value="upload_csv">
-          <label for="csv_file">CSV-Datei auswählen:</label>
-          <input type="file" name="csv_file" id="csv_file" accept=".csv">
-          <input type="submit" value="CSV-Datei importieren" class="button button-primary">
-      </form>
       <?php
       // check user capabilities
       if ( ! current_user_can( 'manage_options' ) ) {
