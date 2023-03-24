@@ -11,7 +11,7 @@ class MC_DB
 		FROM 
 			' . $wpdb->prefix . 'mitglieder 
 		WHERE
-		' . $wpdb->prefix . 'mitglieder.mitglNr = ' . $id;
+		' . $wpdb->prefix . 'mitglieder.mitglNr = "' . $id .'"';
 
 		$result = $wpdb->get_results($query);
 		return '<div class="success">Der Mitarbeiter wurde erfolgreich geslöscht.</div>';
@@ -23,7 +23,7 @@ class MC_DB
 		$query = '';
 
 		$query .=
-			'SELECT members.mitglNr, members.anrede, members.vorname, members.nachname, members.email2, members.email3
+			'SELECT members.mitglNr, members.anrede, members.vorname, members.nachname
 		FROM 
 			' . $wpdb->prefix . 'mitglieder as members
 		WHERE
@@ -32,14 +32,14 @@ class MC_DB
 		return $result = $wpdb->get_results($query);
 	}
 
-	public static function updateMember($id, $anrede, $vorname, $nachname, $email2, $email3){
+	public static function updateMember($id, $anrede, $vorname, $nachname, $idUpdate){
 		global $wpdb;
 		$query = '';
 
 		$query .=
-			 ' UPDATE '. $wpdb->prefix . 'mitglieder SET mitglNr = \''.$id.'\', anrede = \''.$anrede.'\', vorname = \''.$vorname.'\', nachname = \''.$nachname.'\', email2 = \''.$email2.'\', email3 = \''.$email3.'\' 
+			 ' UPDATE '. $wpdb->prefix . 'mitglieder SET mitglNr = "'.$id.'", anrede = "'.$anrede.'", vorname = "'.$vorname.'", nachname = "'.$nachname.'"
 		WHERE
-		' . $wpdb->prefix .'mitglieder.mitglNr = \'' . $id . '\'';
+		' . $wpdb->prefix .'mitglieder.mitglNr = "' . $idUpdate . '"';
 
 		$result = $wpdb->get_results($query);
 	}
@@ -50,7 +50,7 @@ class MC_DB
 		$query = '';
 
 		$query .=
-			'SELECT members.mitglNr as mitgliedsnummer, members.anrede, members.vorname, members.nachname, members.email2, members.email3 , members.abteilung
+			'SELECT members.mitglNr as mitgliedsnummer, members.anrede, members.vorname, members.nachname
 		FROM 
 			' . $wpdb->prefix . 'mitglieder as members'
 		. $where . '	
@@ -62,13 +62,13 @@ class MC_DB
 		return esc_sql($result);
 	}
 
-	public static function insertMember($id, $anrede, $vorname, $nachname, $email2, $email3)
+	public static function insertMember($id, $anrede, $vorname, $nachname)
 	{
 		global $wpdb;
 		$query = '';
 
 		$query .=
-			'INSERT INTO ' . $wpdb->prefix . 'mitglieder (mitglNr, anrede, vorname, nachname, email2, email3) VALUES (' . $id . ', "' . $anrede . '", "' . $vorname . '", "' . $nachname . '", "' . $email2 . '", "' . $email3 . '")';
+			'INSERT INTO ' . $wpdb->prefix . 'mitglieder (mitglNr, anrede, vorname, nachname) VALUES ("' . $id . '", "' . $anrede . '", "' . $vorname . '", "' . $nachname . '")';
 
 		$result = $wpdb->get_results($query);
 

@@ -12,9 +12,7 @@ class MembersTable extends WP_List_Table
       'mitgliedsnummer'  => 'Mitgliedsnummer',
       'anrede'    => 'Anrede',
       'vorname' => 'Vorname',
-      'nachname' => 'Nachname',
-      'email2' => 'eMail 2',
-      'email3' => 'eMail 3'
+      'nachname' => 'Nachname'
     );
     return $columns;
   }
@@ -37,16 +35,14 @@ class MembersTable extends WP_List_Table
       'mitgliedsnummer',
       'anrede',
       'vorname',
-      'nachname',
-      'email2',
-      'email3'
+      'nachname'
     );
 
     $search = ( isset($_REQUEST['s']) ) ? sanitize_text_field($_REQUEST['s']) : false;
     $do_search = '';
     
     if(null!=$search){
-      $do_search .= ( $search ) ? $wpdb->prepare(" WHERE mitglNr LIKE '%%%s%%' OR vorname LIKE '%%%s%%' or nachname LIKE '%%%s%%' or email2 LIKE '%%%s%%' or email3 LIKE '%%%s%%'", $search , $search, $search, $search, $search) : '';
+      $do_search .= ( $search ) ? $wpdb->prepare(" WHERE mitglNr LIKE '%%%s%%' OR vorname LIKE '%%%s%%' or nachname LIKE '%%%s%%'", $search , $search, $search) : '';
     }
 
     $data = MC_DB::getMembersArray($do_search);
@@ -84,22 +80,17 @@ class MembersTable extends WP_List_Table
     <form method="POST" id="editMembers_form">
       <div class="divRow">
         <div class="divCell"><b>Mitgliedsnummer</b>
-          <input typ="text" name="mitgliedsnummer" id="mitgliedsnummer" value="'.esc_html($item['mitgliedsnummer']).'">
+          <input type="text" name="mitgliedsnummer" id="mitgliedsnummer" value="'.esc_html($item['mitgliedsnummer']).'">
+          <input type="hidden" name="mitgliedsnummer_update" id="mitgliedsnummer_update" value="'.esc_html($item['mitgliedsnummer']).'">
         </div>
         <div class="divCell"><b>Anrede</b>
-          <input typ="text" name="anrede" id="anrede" value="'.esc_html($item['anrede']).'">
+          <input type="text" name="anrede" id="anrede" value="'.esc_html($item['anrede']).'">
         </div>
         <div class="divCell"><b>Vorname</b>
-          <input typ="text" name="vorname" id="vorname" value="'.esc_html($item['vorname']).'">
+          <input type="text" name="vorname" id="vorname" value="'.esc_html($item['vorname']).'">
         </div>
         <div class="divCell"><b>Nachname</b>
-          <input typ="text" name="nachname" id="nachname" value="'.esc_html($item['nachname']).'">
-        </div>
-        <div class="divCell"><b>eMail2</b>
-          <input typ="text" name="email2" id="email2" value="'.esc_html($item['email2']).'">
-        </div>
-        <div class="divCell"><b>eMail3</b>
-          <input typ="text" name="email3" id="email3" value="'.esc_html($item['email3']).'">
+          <input type="text" name="nachname" id="nachname" value="'.esc_html($item['nachname']).'">
         </div>
         <div class="divCell" style="display:flex;">
           <button style=" cursor:pointer;" type="submit" name="submit">speichern</button>
@@ -111,15 +102,14 @@ class MembersTable extends WP_List_Table
   
   if(isset($_POST['submit'])){
     $id=$_POST['mitgliedsnummer'];
+    $idUpdate=$_POST['mitgliedsnummer_update'];
     $anrede=sanitize_text_field($_POST['anrede']);
     $vorname=sanitize_text_field($_POST['vorname']);
     $nachname=sanitize_text_field($_POST['nachname']);
-    $email2=sanitize_text_field($_POST['email2']);
-    $email3=sanitize_text_field($_POST['email3']);
 
 
     if(null!=$id && strlen($id) == 6){
-      MC_DB::updateMember($id, $anrede, $vorname, $nachname, $email2, $email3);
+      MC_DB::updateMember($id, $anrede, $vorname, $nachname, $idUpdate);
       wp_redirect( esc_url( add_query_arg() ) );
     }
   }
@@ -134,8 +124,6 @@ class MembersTable extends WP_List_Table
       case 'anrede':
       case 'vorname':
       case 'nachname':
-      case 'email2':
-      case 'email3':
         return $item[$column_name];
       default:
         return print_r($item, false); //Show the whole array for troubleshooting purposes
@@ -149,8 +137,6 @@ class MembersTable extends WP_List_Table
       'anrede' => array('anrede', true),
       'vorname'   => array('vorname', true),
       'nachname'   => array('nachname', true),
-      'email2'   => array('email2', true),
-      'email3'   => array('email3', true)
     );
     return $sortable_columns;
   }
@@ -192,22 +178,16 @@ class MembersTable extends WP_List_Table
       <form method="POST">
       <div class="divRow">
         <div class="divCell"><b>Mitgliedsnummer</b>
-          <input typ="text" name="mitgliedsnummer" id="mitgliedsnummer" value="">
+          <input type="text" name="mitgliedsnummer" id="mitgliedsnummer" value="">
         </div>
         <div class="divCell"><b>Anrede</b>
-          <input typ="text" name="anrede" id="anrede" value="">
+          <input type="text" name="anrede" id="anrede" value="">
         </div>
         <div class="divCell"><b>Vorname</b>
-          <input typ="text" name="vorname" id="vorname" value="">
+          <input type="text" name="vorname" id="vorname" value="">
         </div>
         <div class="divCell"><b>Nachname</b>
-          <input typ="text" name="nachname" id="nachname" value="">
-        </div>
-        <div class="divCell"><b>eMail2</b>
-          <input typ="text" name="email2" id="email2" value="">
-        </div>
-        <div class="divCell"><b>eMail3</b>
-          <input typ="text" name="email3" id="email3" value="">
+          <input type="text" name="nachname" id="nachname" value="">
         </div>
         <div class="divCell" style="display:flex;">
           <button style=" cursor:pointer;" type="submit" name="addMember">speichern</button>
@@ -221,11 +201,9 @@ class MembersTable extends WP_List_Table
     $anrede=sanitize_text_field($_POST['anrede']);
     $vorname=sanitize_text_field($_POST['vorname']);
     $nachname=sanitize_text_field($_POST['nachname']);
-    $email2=sanitize_text_field($_POST['email2']);
-    $email3=sanitize_text_field($_POST['email3']);
 
     if(null!=$id && strlen($id) == 6){
-      MC_DB::insertMember($id, $anrede, $vorname, $nachname, $email2, $email3);
+      MC_DB::insertMember($id, $anrede, $vorname, $nachname);
     }else{
       echo 'Mitgliedsnummer nicht lang genug';
     }
