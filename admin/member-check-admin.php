@@ -8,7 +8,7 @@
 function member_checker_creator()
 {
   add_menu_page('Mitglieder', 'Mitglieder-Admin', 'manage_options', 'member-checker-menu', 'member_checker_home', 'dashicons-list-view', 5);
-  add_submenu_page('member-checker-menu', 'CSV Import', 'CSV Import', 'manage_options', 'member-checker-import', 'member_checker_file_upload');
+  add_submenu_page('member-checker-menu', 'Mitgliederliste Import', 'Mitgliederliste Import', 'manage_options', 'member-checker-import', 'member_checker_file_upload');
 }
 add_action('admin_menu', 'member_checker_creator');
 
@@ -68,7 +68,22 @@ function member_checker_file_upload() {
     // HTML-Formular für den Datei-Upload
     ?>
     <div class="wrap">
-        <h1>Datei importieren</h1>
+        <h1>Mitgliederliste Import</h1>    
+        <h2>Bitte wählen Sie eine gültige csv Datei aus.</h2>
+        <p>Eine gültige Datei <u>muss</u> wie folgt aufgebaut sein:</p>
+        <ul>
+            <li>anrede</li>
+            <li>mitglNr</li>
+            <li>vorname</li>
+            <li>nachname</li>
+            <li>abteilung</li>
+            <li>email2</li>
+            <li>email3</li>
+        </ul>
+        <p>Die Datei muss die oben genannten 7 Spalten besitzen. Jede Spalte muss mit einem "" eingeschlossen sein. Zusätzlich müssen die einzelnen Spalten mit einem Semikolon getrennt werden. </p>
+        <p>(z.B.) "Herr";"000004";"Stephan";"Christ";;; </p>
+        <h3>!Achtung!</h3>
+        <p>Jeder Import LÖSCHT vorab die alte Mitgliederliste aus der Datenbank!</p>
         <?php if(isset($error_message)) { ?>
             <div class="notice notice-error"><p><?php echo $error_message; ?></p></div>
         <?php } ?>
