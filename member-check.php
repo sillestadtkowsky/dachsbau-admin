@@ -5,8 +5,8 @@ ob_start();
  *
  * Plugin Name:       member-check
  * Plugin URI:        https://plugins-wordpress-osowsky-webdesign.info
- * Description:       Prüft beim Buchen eines Kurse auf eine gültige Mitgliedsnummer und lässte das aktualisieren der Mitgliedinformationen im Admin Bereich zu.
- * Version:           2.0.0
+ * Description:       Prüft beim buchen eines Kurse auf eine gültige Mitgliedsnummer und lässt das aktualisieren der Mitgliedsnummern im Admin Bereich zu.
+ * Version:           2.0.5
  * Requires at least: 6.1.1
  * Requires PHP:      7.2
  * Author:            Silvio Osowsky <i class="fas fa-heart"></i>
@@ -27,7 +27,6 @@ define( 'MC_PLUGIN_PLUGIN_PATH', plugin_dir_url( __FILE__ ) );
 
 require_once MC_PLUGIN_PLUGIN_DIR .  '/inc/wp-enqueue.php';
 
-require_once MC_PLUGIN_PLUGIN_DIR .  '/class/import.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/db.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/utils.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/members.table.class.php';

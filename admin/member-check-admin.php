@@ -8,32 +8,79 @@
 function member_checker_creator()
 {
   add_menu_page('Mitglieder', 'Mitglieder-Admin', 'manage_options', 'member-checker-menu', 'member_checker_home', 'dashicons-list-view', 5);
-  
-  // Add new submenu page for file upload
-  add_submenu_page( 'member-checker-menu', 'Datei importieren', 'Datei importieren', 'manage_options', 'member-checker-file-upload', 'member_checker_file_upload' );
+  add_submenu_page('member-checker-menu', 'CSV Import', 'CSV Import', 'manage_options', 'member-checker-import', 'member_checker_file_upload');
 }
 add_action('admin_menu', 'member_checker_creator');
 
 
 function member_checker_file_upload() {
-  global $wpdb;
-  $table_name = $wpdb->prefix . 'my_table_name';
-  
-  if(isset($_FILES['csv_file']) && $_FILES['csv_file']['error'] == 0) {
-      $file = $_FILES['csv_file']['tmp_name'];
-      $handle = fopen($file, "r");
-      $row = 0;
-      while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-          if ($row > 0) {
-              $wpdb->insert($table_name, array('column1' => $data[0], 'column2' => $data[1]));
-          }
-          $row++;
-      }
-      fclose($handle);
-      echo '<div class="notice notice-success is-dismissible"><p>CSV-Datei erfolgreich importiert.</p></div>';
-  } elseif(isset($_FILES['csv_file'])) {
-      echo '<div class="notice notice-error is-dismissible"><p>Es ist ein Fehler beim Importieren der CSV-Datei aufgetreten.</p></div>';
-  }
+    if(isset($_POST["submit"])) {
+        global $wpdb;
+        
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+        
+        // Name der Tabelle, in die importiert werden soll
+        $table_name = $wpdb->prefix . 'mitglieder';
+        echo '<input type="hidden" id="table-name" value="' . $table_name . '">';
+       
+        // Löschen der vorhandenen Einträge in der Tabelle
+        $wpdb->query("TRUNCATE TABLE $table_name");
+
+        // Pfad zur CSV-Datei
+        $file_path = $_FILES["fileToUpload"]["tmp_name"];
+
+        // Überprüfung, ob eine Datei hochgeladen wurde
+        if(empty($file_path)) {
+            $error_message = "Es wurde keine Datei hochgeladen.";
+        } else {
+            // Öffnen der CSV-Datei
+            $file = fopen($file_path, 'r');
+
+            // Schleife zum Lesen der CSV-Datei
+            while (($data = fgetcsv($file, 0, ';')) !== FALSE) {
+                // Einfügen der Daten in die Tabelle
+                $wpdb->insert(
+                    $table_name,
+                    array(
+                        'anrede' => $data[0],
+                        'mitglNr' => $data[1],
+                        'vorname' => $data[2],
+                        'nachname' => $data[3],
+                        'abteilung' => $data[4],
+                        'email2' => $data[5],
+                        'email3' => $data[6]
+                    )
+                );
+            }
+
+            if ($wpdb->last_error) {
+                wp_die("Fehler beim Importieren der CSV-Datei: " . $wpdb->last_error);
+             }
+
+            // Schließen der CSV-Datei
+            fclose($file);
+
+            $success_message = "Die Datei wurde erfolgreich importiert.";
+        }
+    }
+
+    // HTML-Formular für den Datei-Upload
+    ?>
+    <div class="wrap">
+        <h1>Datei importieren</h1>
+        <?php if(isset($error_message)) { ?>
+            <div class="notice notice-error"><p><?php echo $error_message; ?></p></div>
+        <?php } ?>
+        <?php if(isset($success_message)) { ?>
+            <div class="notice notice-success"><p><?php echo $success_message; ?></p></div>
+        <?php } ?>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="fileToUpload" id="fileToUpload">
+            <input type="submit" value="Hochladen" name="submit">
+        </form>
+    </div>
+    <?php
 }
 
 /* 
