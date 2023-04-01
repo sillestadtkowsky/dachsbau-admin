@@ -37,19 +37,16 @@ function member_checker_file_upload() {
             // Öffnen der CSV-Datei
             $file = fopen($file_path, 'r');
 
-            // Schleife zum Lesen der CSV-Datei
+            // Schleife zum Lesen der CSV-Datei | MitglNr;Anrede;Vorname;Nachname
             while (($data = fgetcsv($file, 0, ';')) !== FALSE) {
                 // Einfügen der Daten in die Tabelle
                 $wpdb->insert(
                     $table_name,
                     array(
-                        'anrede' => $data[0],
-                        'mitglNr' => $data[1],
-                        'vorname' => $data[2],
-                        'nachname' => $data[3],
-                        'abteilung' => $data[4],
-                        'email2' => $data[5],
-                        'email3' => $data[6]
+                        'Anrede' => $data[1],
+                        'MitglNr' => $data[0],
+                        'Vorname' => $data[2],
+                        'Nachname' => $data[3]
                     )
                 );
             }
@@ -72,16 +69,13 @@ function member_checker_file_upload() {
         <h2>Bitte wählen Sie eine gültige csv Datei aus.</h2>
         <p>Eine gültige Datei <u>muss</u> wie folgt aufgebaut sein:</p>
         <ul>
-            <li>anrede</li>
             <li>mitglNr</li>
+            <li>anrede</li>
             <li>vorname</li>
             <li>nachname</li>
-            <li>abteilung</li>
-            <li>email2</li>
-            <li>email3</li>
         </ul>
-        <p>Die Datei muss die oben genannten 7 Spalten besitzen. Jede Spalte muss mit einem "" eingeschlossen sein. Zusätzlich müssen die einzelnen Spalten mit einem Semikolon getrennt werden. </p>
-        <p>(z.B.) "Herr";"000004";"Stephan";"Christ";;; </p>
+        <p>Die Datei muss die oben genannten <b>4 Spalten</b> besitzen. Jede Spalte muss mit einem Semikolon getrennt werden. </p>
+        <p>(z.B.) "000004";"Herr";"Stephan";"Christ" </p>
         <h3>!Achtung!</h3>
         <p>Jeder Import LÖSCHT vorab die alte Mitgliederliste aus der Datenbank!</p>
         <?php if(isset($error_message)) { ?>
