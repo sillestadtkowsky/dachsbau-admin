@@ -3,7 +3,7 @@ ob_start();
 
 /**
  *
- * Plugin Name:       member-check
+ * Plugin Name:       dachsbau-karow
  * Plugin URI:        https://plugins-wordpress-osowsky-webdesign.info
  * Description:       Prüft beim buchen eines Kurse auf eine gültige Mitgliedsnummer und lässt das aktualisieren der Mitgliedsnummern im Admin Bereich zu.
  * Version:           2.0.11
@@ -31,4 +31,4 @@ require_once MC_PLUGIN_PLUGIN_DIR .  '/class/db.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/utils.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/members.table.class.php';
 
-require_once MC_PLUGIN_PLUGIN_DIR .  '/admin/member-check-admin.php';
+require_once MC_PLUGIN_PLUGIN_DIR .  '/admin/dachsbau-karow-admin.php';
