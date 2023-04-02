@@ -217,15 +217,15 @@ class SO_EventBookingTable extends WP_List_Table
                     $wpdb->delete("{$wpdb->prefix}event_booking_saves", array('booking_id' => $booking_id));
                 }
                 // Aktualisiere die Adminseite
-                wp_redirect(admin_url('admin.php?page=schedule-booking'));
+                wp_redirect(admin_url('admin.php?page=so_schedule-booking'));
                 exit;
             } else {
                 echo '<script>
-                    var confirmed = confirm("Are you sure you want to delete the selected bookings?");
+                    var confirmed = confirm("Du willst die ausgewählten Buchungen aus der Datenbank entfernen?");
                     if (confirmed) {
                         var form = document.createElement("form");
                         form.method = "post";
-                        form.action = "' . admin_url('admin.php?page=schedule-booking') . '";
+                        form.action = "' . admin_url('admin.php?page=so_schedule-booking') . '";
                         form.innerHTML = \'<input type="hidden" name="action" value="delete">\';
                         form.innerHTML += \'<input type="hidden" name="booking_id[]" value="' . implode('"><input type="hidden" name="booking_id[]" value="', $bookings) . '">\';
                         form.innerHTML += \'<input type="hidden" name="confirm_delete" value="yes">\';

@@ -1,5 +1,6 @@
 <?php
 
+
 /*
 * ###############################
 * ADD Admin Menu
@@ -10,13 +11,12 @@ function so_DachsbauKarowAdminMenu()
     add_menu_page('Dachsbau-Admin', 'Dachsbau-Admin', 'manage_options', 'so_dachsbau-karow-admin-menu', 'so_dachsbau_admin_info_page', 'dashicons-list-view', 5);
 
     // Add sub-menu pages
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste', 'Mitgliederliste', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste Import', 'Mitgliederliste Import', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
+    add_submenu_page('so_dachsbau-karow-admin-menu', esc_html__('Buchungen exportieren', 'timetable'), esc_html__('Buchungen exportieren', 'timetable'), 'read', 'timetable_admin_bookings_export', array(new SP_Bookings, 'bookings_export_page'));
     add_submenu_page('so_dachsbau-karow-admin-menu','Gelöscht Buchungen','Gelöscht Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu','Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
-
 }
-
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
 
 function so_dachsbau_admin_info_page() {
@@ -36,21 +36,30 @@ function so_dachsbau_admin_info_page() {
     </div>
     <p><?php echo esc_html(get_bloginfo('description')); ?></p>
     <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-top: 30px;">
-        <div style="width: 100%;"><hr><h3>Willkommen im Dachsbau Admin Bereich</h3></div>
+        <div style="width: 100%;"><hr>
+            <h3>Willkommen im Dachsbau Admin Bereich</h3>
+            <p>
+                <a href="https://osowsky-webdesign.de/#kontakt" target="_blank">Support Kontaktformular</a>&nbsp;|&nbsp;<a href="tel:017647782068" target="_blank">Support Telefon</a>
+            </p>
+        </div>
             <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Konfiguration</h3>
                 <p>Nehme hier optionale Einstellungen vor </p>
             </a>
             <a href="<?php echo admin_url('admin.php?page=so_member-checker-import'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                <h3>Mitgliederliste</h3>
+                <h3>Mitgliederliste bearbeiten</h3>
                 <p>Verwalte hier die Mitgliederliste.</p>
             </a>
             <a href="<?php echo admin_url('admin.php?page=so_member_checker_file_upload'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                <h3>Mitgliederliste Import</h3>
+                <h3>Mitgliederliste importieren</h3>
                 <p>Lade hier eine aktuelle neue Mitgliederliste hoch.</p>
+            </a>            
+            <a href="<?php echo admin_url('admin.php?page=timetable_admin_bookings_export'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+                <h3>Aktuelle Buchungen exportieren</h3>
+                <p>Hier können alte Buchungen, welche noch nicht mit der automatik gelöscht wurden, exportiert werden.</p>
             </a>
             <a href="<?php echo admin_url('admin.php?page=so_schedule-booking'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                <h3>Gelöschte Buchungen</h3>
+                 <h3>Gelöschte Buchungen</h3>
                 <p>Verwalte hier automatisch gelöschte Buchungen.</p>
             </a>
         </div>
@@ -58,14 +67,27 @@ function so_dachsbau_admin_info_page() {
     <?php
 }
 
-function so_dachsbau_admin_config() {
-    require_once('class/so-kurs-scheduler/booking-save-admin-table-class.php');
-    $booking_list_table = new SO_EventBookingTable();
-    $booking_list_table->prepare_items();
+function so_dachsbau_admin_config() {   
+    // Schalter speichern
+    if (isset($_POST['scheduler_enabled'])) {
+        update_option('scheduler_enabled', $_POST['scheduler_enabled']);
+    }
+
+    // Aktuellen Schalterwert abrufen
+    $scheduler_enabled = get_option('scheduler_enabled', false);
+
     ?>
+
     <div class="wrap">
         <h2>Konfigurationen</h2>
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
+        <form method="post">
+            <label for="scheduler_enabled">Scheduler aktivieren:</label>
+            <input type="hidden" name="scheduler_enabled" value="0">
+            <input type="checkbox" name="scheduler_enabled" id="scheduler_enabled" value="1" <?php checked('1', $scheduler_enabled); ?>>
+            <br><br>
+            <input type="submit" value="Änderungen speichern">
+        </form>
     </div>
     <?php
 }
