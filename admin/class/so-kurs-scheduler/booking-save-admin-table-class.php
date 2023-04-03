@@ -50,6 +50,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Kursende' => 'Kursende',
             'Mitgliedsname' => 'Mitgliedsname',
             'Mail' => 'Mail',
+            'Mitgliedsnummer' => 'Mitgliedsnummer',
             'Loeschdatum' => 'Loeschdatum'
         );
         return $columns;
@@ -67,6 +68,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Buchungsdatum' => 'Buchungsdatum',
             'Kursbeginn' => 'Kursbeginn',
             'Mitgliedsname' => 'Mitgliedsname',
+            'Mitgliedsnummer' => 'Mitgliedsnummer',
             'Mail' => 'Mail'
         );
         return $filterable_columns;
@@ -87,28 +89,30 @@ class SO_EventBookingTable extends WP_List_Table
           'Kurs',
           'Buchungsdatum',
           'Kursbeginn',
-          'Mitgliedsname'
+          'Mitgliedsname',
+          'Mitgliedsnummer',
+          'Mail'
         );
     
         $do_search = '';
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
 
         if(null!=$search){
-            $do_search .= ( $search ) ? $wpdb->prepare(" WHERE bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR u.user_nicename LIKE '%%%s%%' or u.user_email LIKE '%%%s%%'", $search , $search , $search, $search) : '';
-          }
+            $do_search .= ( $search ) ? $wpdb->prepare(" WHERE bs.mitgliedsnummer  = %s OR bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR bs.name LIKE '%%%s%%' or bs.email LIKE '%%%s%%'", $search, $search , $search , $search, $search) : '';
+        }
 
         $query = "SELECT bs.booking_id as Id, p.post_title AS Kurs, 
                     DATE_FORMAT(bs.booking_datetime,'%d.%m.%Y') AS Buchungsdatum,
                     DATE_FORMAT(bs.booking_datetime,'%H:%i') AS Buchungszeit,
                     DATE_FORMAT(ih.start,'%H:%i') AS Kursbeginn,
                     DATE_FORMAT(ih.end,'%H:%i') AS Kursende,
-                    u.user_nicename AS Mitgliedsname,
-                    u.user_email AS Mail,
+                    bs.mitgliedsnummer as Mitgliedsnummer,
+                    bs.name as Mitgliedsname,
+                    bs.email as Mail,
                     DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum
                   FROM {$wpdb->prefix}event_booking_saves AS bs
                   LEFT JOIN {$wpdb->prefix}event_hours AS ih ON ih.event_hours_id=bs.event_hours_id 
-                  LEFT JOIN {$wpdb->prefix}posts AS p ON p.id=ih.event_id
-                  LEFT JOIN {$wpdb->prefix}users AS u ON u.id=bs.user_id " . $do_search;
+                  LEFT JOIN {$wpdb->prefix}posts AS p ON p.id=ih.event_id " . $do_search;
         
         // Sortierung hinzufügen
         $orderby = $this->get_orderby();
@@ -151,6 +155,7 @@ class SO_EventBookingTable extends WP_List_Table
             case 'Kursende':
             case 'Mitgliedsname':
             case 'Mail':
+            case 'Mitgliedsnummer':
             case 'Loeschdatum':
                 return $item[ $column_name ];
             default:
@@ -168,6 +173,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Kursbeginn' => array('Kursbeginn', true),
             'Kursende' => array('Kursende', true),
             'Mitgliedsname' => array('Mitgliedsname', true),
+            'Mitgliedsnummer' => array('Mitgliedsnummer', true),
             'Mail' => array('Mail', true),
             'Loeschdatum' => array('Loeschdatum', true)
         );

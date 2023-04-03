@@ -10,7 +10,7 @@ function so_DachsbauKarowAdminMenu()
 {
     add_menu_page('Dachsbau-Admin', 'Dachsbau-Admin', 'manage_options', 'so_dachsbau-karow-admin-menu', 'so_dachsbau_admin_info_page', 'dashicons-list-view', 5);
 
-    // Add sub-menu pages
+    //Add sub-menu pages
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
     add_submenu_page('so_dachsbau-karow-admin-menu', esc_html__('Buchungen exportieren', 'timetable'), esc_html__('Buchungen exportieren', 'timetable'), 'read', 'timetable_admin_bookings_export', array(new SP_Bookings, 'bookings_export_page'));
