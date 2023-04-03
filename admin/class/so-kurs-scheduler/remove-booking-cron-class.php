@@ -21,7 +21,7 @@
         function so_getUpcomingEvents($args) {
             $bookings_to_delete = self::so_getBookingsToDelete($args);
             self::so_saveBookingsToTable($bookings_to_delete);
-            //self::so_deleteBookings($bookings_to_delete);
+            self::so_deleteBookings($bookings_to_delete);
             return $bookings_to_delete;
         }
         
