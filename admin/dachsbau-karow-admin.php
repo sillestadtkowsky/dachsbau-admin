@@ -42,10 +42,6 @@ function so_dachsbau_admin_info_page() {
                 <a href="https://osowsky-webdesign.de/#kontakt" target="_blank">Support Kontaktformular</a>&nbsp;|&nbsp;<a href="tel:017647782068" target="_blank">Support Telefon</a>
             </p>
         </div>
-            <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                <h3>Konfiguration</h3>
-                <p>Nehme hier optionale Einstellungen vor </p>
-            </a>
             <a href="<?php echo admin_url('admin.php?page=so_member-checker-import'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Mitgliederliste bearbeiten</h3>
                 <p>Verwalte hier die Mitgliederliste.</p>
@@ -61,6 +57,10 @@ function so_dachsbau_admin_info_page() {
             <a href="<?php echo admin_url('admin.php?page=so_schedule-booking'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                  <h3>Gelöschte Buchungen</h3>
                 <p>Verwalte hier automatisch gelöschte Buchungen.</p>
+            </a>           
+            <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+                <h3>Konfiguration</h3>
+                <p>Nehme hier optionale Einstellungen vor </p>
             </a>
         </div>
     </div>
@@ -83,7 +83,7 @@ function so_dachsbau_admin_config() {
 
     // Schalter speichern
     if (isset($_POST['submit'])) {
-        update_option('scheduler_enabled', isset($_POST['scheduler_enabled']) ? 1 : 0);
+        update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
         $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
         
@@ -98,34 +98,39 @@ function so_dachsbau_admin_config() {
     }
 
     // Aktuelle Werte abrufen
-    $scheduler_enabled = get_option('scheduler_enabled', false);
+    $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
 
     ?>
-    <div class="wrap">
+    <div class="wrap" style="max-width: 800px;">
         <h2>Konfigurationen</h2>
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
-        <form method="post" style="padding: 20px;">
-            <!-- Scheduler aktivieren -->
-            <div style="margin-bottom: 20px;">
-                <label for="scheduler_enabled" style="display: inline-block; width: 200px;">Scheduler aktivieren:</label>
-                <input type="hidden" name="scheduler_enabled" value="0">
-                <input type="checkbox" name="scheduler_enabled" id="scheduler_enabled" value="1" <?php checked('1', $scheduler_enabled); ?> style="display: inline-block;">
+        <form method="post" style="padding: 20px 0px 20px 0px;">
+            <div style="margin-bottom: 20px;"><!-- Scheduler aktivieren -->
+                <label for="so_scheduler_enabled" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Scheduler aktivieren:</label>
+                <select name="so_scheduler_enabled" id="so_scheduler_enabled" style="display: inline-block;">
+                    <option value="1" <?php selected('1', $so_scheduler_enabled); ?>>Ja</option>
+                    <option value="0" <?php selected('0', $so_scheduler_enabled); ?>>Nein</option>
+                </select>
+                <p style="margin-top: 5px; font-size: 0.9em;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten für Kursbeginn)</p>
             </div>
             <!-- Uhrzeit der Kursschliessung -->
             <div style="margin-bottom: 20px;">
-                <label for="so_kurs_close_at" style="display: inline-block; width: 200px;">Uhrzeit der Kursschliessung:</label>
+                <label for="so_kurs_close_at" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Uhrzeit der Kursschliessung:</label>
                 <select name="so_kurs_close_at" id="so_kurs_close_at" style="display: inline-block;">
                     <option value="so_close_kurs_at_start_time" <?php selected('so_close_kurs_at_start_time', $so_kurs_close_at); ?>>Zum Kursbeginn</option>
-                    <option value="so_close_kurs_at_end_time" <?php selected('so_close_kurs_at_end_time', $so_kurs_close_at); ?>>Zum Kursende</option>
+                    <option value="so_close_kurs_at_15_minutes_before_start_time" <?php selected('so_close_kurs_at_15_minutes_before_start_time', $so_kurs_close_at); ?>>15 Minuten vor Kursbeginn</option>
+                    <option value="so_close_kurs_at_30_minutes_before_start_time" <?php selected('so_close_kurs_at_30_minutes_before_start_time', $so_kurs_close_at); ?>>30 Minuten vor Kursbeginn</option>
                 </select>
+                <p style="margin-top: 5px; font-size: 0.9em;">Setzt den Zeitpunkt, ab wann der jeweilge Kurs nicht mehr bebucht werden kann.</p>
             </div>
             <!-- Buchungsfreigabe nächster Tag -->
             <div style="margin-bottom: 20px;">
-                <label for="so_kurs_booking_open_time" style="display: inline-block; width: 200px;">Buchungsfreigabe nächster Tag:</label>
+                <label for="so_kurs_booking_open_time" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Buchungsfreigabe nächster Tag:</label>
                 <input type="text" name="so_kurs_booking_open_time" id="so_kurs_booking_open_time" value="<?php echo esc_attr($so_kurs_booking_open_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
                 <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 12:00)</span>
+                <p style="margin-top: 5px; font-size: 0.9em;">Setzt die Uhrzeit für den Folgetag, ab wann die Kurse wieder buchbar sind..</p>
             </div>
             <!-- Submit-Button -->
             <div style="margin-top: 20px;">
