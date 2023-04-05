@@ -67,26 +67,70 @@ function so_dachsbau_admin_info_page() {
     <?php
 }
 
-function so_dachsbau_admin_config() {   
-    // Schalter speichern
-    if (isset($_POST['scheduler_enabled'])) {
-        update_option('scheduler_enabled', $_POST['scheduler_enabled']);
+function so_dachsbau_admin_config() {
+
+    // Fehlermeldungen ausgeben
+    if ( ! empty( $_GET['settings-updated'] ) ) {
+        $errors = get_settings_errors();
+        if ( count( $errors ) > 0 ) {
+            echo '<div id="setting-error-settings_updated" class="notice notice-error settings-error">';
+            foreach( $errors as $error ) {
+                echo '<p>' . $error['message'] . '</p>';
+            }
+            echo '</div>';
+        }
     }
 
-    // Aktuellen Schalterwert abrufen
+    // Schalter speichern
+    if (isset($_POST['submit'])) {
+        update_option('scheduler_enabled', isset($_POST['scheduler_enabled']) ? 1 : 0);
+        update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
+        $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
+        
+        // Validierung der Buchungsfreigabezeit
+        if (preg_match('/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/', $so_kurs_booking_open_time)) {
+            update_option('so_kurs_booking_open_time', $so_kurs_booking_open_time);
+            add_settings_error('my_setting', 'success', 'Die Einstellungen wurden erfolgreich gespeichert.', 'updated');
+        } else {
+            add_settings_error('so_kurs_booking_open_time', 'invalid_time_format', 'Bitte gib eine gültige Uhrzeit ein (Format: Stunde und Minute, z.B. 12:00).');
+        }
+        settings_errors();
+    }
+
+    // Aktuelle Werte abrufen
     $scheduler_enabled = get_option('scheduler_enabled', false);
+    $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
+    $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
 
     ?>
-
     <div class="wrap">
         <h2>Konfigurationen</h2>
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
-        <form method="post">
-            <label for="scheduler_enabled">Scheduler aktivieren:</label>
-            <input type="hidden" name="scheduler_enabled" value="0">
-            <input type="checkbox" name="scheduler_enabled" id="scheduler_enabled" value="1" <?php checked('1', $scheduler_enabled); ?>>
-            <br><br>
-            <input type="submit" value="Änderungen speichern">
+        <form method="post" style="padding: 20px;">
+            <!-- Scheduler aktivieren -->
+            <div style="margin-bottom: 20px;">
+                <label for="scheduler_enabled" style="display: inline-block; width: 200px;">Scheduler aktivieren:</label>
+                <input type="hidden" name="scheduler_enabled" value="0">
+                <input type="checkbox" name="scheduler_enabled" id="scheduler_enabled" value="1" <?php checked('1', $scheduler_enabled); ?> style="display: inline-block;">
+            </div>
+            <!-- Uhrzeit der Kursschliessung -->
+            <div style="margin-bottom: 20px;">
+                <label for="so_kurs_close_at" style="display: inline-block; width: 200px;">Uhrzeit der Kursschliessung:</label>
+                <select name="so_kurs_close_at" id="so_kurs_close_at" style="display: inline-block;">
+                    <option value="so_close_kurs_at_start_time" <?php selected('so_close_kurs_at_start_time', $so_kurs_close_at); ?>>Zum Kursbeginn</option>
+                    <option value="so_close_kurs_at_end_time" <?php selected('so_close_kurs_at_end_time', $so_kurs_close_at); ?>>Zum Kursende</option>
+                </select>
+            </div>
+            <!-- Buchungsfreigabe nächster Tag -->
+            <div style="margin-bottom: 20px;">
+                <label for="so_kurs_booking_open_time" style="display: inline-block; width: 200px;">Buchungsfreigabe nächster Tag:</label>
+                <input type="text" name="so_kurs_booking_open_time" id="so_kurs_booking_open_time" value="<?php echo esc_attr($so_kurs_booking_open_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
+                <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 12:00)</span>
+            </div>
+            <!-- Submit-Button -->
+            <div style="margin-top: 20px;">
+                <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;">Änderungen speichern</button>
+            </div>
         </form>
     </div>
     <?php
