@@ -114,7 +114,7 @@ class SO_EventBookingTable extends WP_List_Table
                     DATE_FORMAT(ih.end,'%H:%i') AS Kursende,
                     bs.mitgliedsnummer as Mitgliedsnummer,
                     bs.name as Mitgliedsname,
-                    bs.email as Mail,
+                    CONCAT('<a href=\"mailto:', bs.email, '\">', bs.email, '</a>') as Mail,
                     DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum
                   FROM {$wpdb->prefix}event_booking_saves AS bs
                   LEFT JOIN {$wpdb->prefix}event_hours AS ih ON ih.event_hours_id=bs.event_hours_id 
@@ -278,16 +278,20 @@ class SO_EventBookingTable extends WP_List_Table
         header('Content-Disposition: attachment; filename=' . $pdfExportName .'.csv');
         
         // Schleife über alle Buchungen und schreibe sie in die CSV-Datei
+        
         foreach($bookings as $booking)
         {
             $data = array(
-                $booking->email,
-                $booking->mitgliedsnummer,
-                $booking->booking_id,
-                $booking->event_hours_id,
-                $booking->name,
-                $booking->booking_datetime,
-                $booking->booking_delete_datetime
+                $booking->Id,
+                $booking->Kurs,
+                $booking->Kursbeginn,
+                $booking->Kursende,
+                $booking->Buchungsdatum,
+                $booking->Mitgliedsname,
+                $booking->Mitgliedsnummer,
+                $booking->Mail,               
+                $booking->Buchungszeit,
+                $booking->Loeschdatum
             );
     
             // Schreibe die Daten in die CSV-Datei
@@ -306,7 +310,7 @@ class SO_EventBookingTable extends WP_List_Table
         $fp = fopen('php://output', 'w');
     
         // Schreiben Sie die Headerzeile in die CSV-Datei
-        fputcsv($fp, array('Email', 'Mitgliedsnummer', 'Booking ID', 'Event Hours ID', 'Name', 'Booking Datumzeit', 'Booking Löschdatumzeit'));
+        fputcsv($fp, array('Id', 'Kurs', 'Kursbeginn', 'Kursende', 'Buchungsdatum', 'Mitgliedsname', 'Mitgliedsnummer', 'Mail', 'Buchungszeit', 'Loeschdatum'));
     
         // Schreiben Sie den gefilterten Inhalt in die CSV-Datei
         fwrite($fp, $output);

@@ -86,6 +86,7 @@ function so_dachsbau_admin_config() {
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
         update_option('so_pdf_export_name', isset($_POST['so_pdf_export_name']) ? sanitize_text_field($_POST['so_pdf_export_name']) : '');
+        update_option('so_kurs_names_description', isset($_POST['so_kurs_names_description']) ? sanitize_text_field($_POST['so_kurs_names_description']) : '');
         $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
         
         // Validierung der Buchungsfreigabezeit
@@ -95,6 +96,12 @@ function so_dachsbau_admin_config() {
         } else {
             add_settings_error('so_kurs_booking_open_time', 'invalid_time_format', 'Bitte gib eine gültige Uhrzeit ein (Format: Stunde und Minute, z.B. 12:00).');
         }
+
+
+        // Speichern der ausgewählten Kursnamen
+        $so_kurs_names = isset($_POST['so_kurs_names']) ? $_POST['so_kurs_names'] : array();
+        update_option('so_kurs_names', $so_kurs_names);
+
         settings_errors();
     }
 
@@ -102,46 +109,115 @@ function so_dachsbau_admin_config() {
     $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
+    $pdf_export_name = get_option('pdf_export_name', 'gesicherte-buchungen');
+    $so_kurs_names_description = get_option('so_kurs_names_description', '** feste Gruppe **');
+    $so_kurs_names = get_option('so_kurs_names', array());
 
     ?>
     <div class="wrap" style="max-width: 800px;">
         <h2>Konfigurationen</h2>
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
         <form method="post" style="padding: 20px 0px 20px 0px;">
-            <div style="margin-bottom: 20px;"><!-- Scheduler aktivieren -->
-                <label for="so_scheduler_enabled" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Scheduler aktivieren:</label>
-                <select name="so_scheduler_enabled" id="so_scheduler_enabled" style="display: inline-block;">
-                    <option value="1" <?php selected('1', $so_scheduler_enabled); ?>>Ja</option>
-                    <option value="0" <?php selected('0', $so_scheduler_enabled); ?>>Nein</option>
-                </select>
-                <p style="margin-top: 5px; font-size: 0.9em;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten für Kursbeginn)</p>
+        <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235); border-left: 3px solid #012c6d;">
+            <!-- Scheduler aktivieren -->
+            <div style="display: flex; align-items: flex-start;">
+                <div style="display: inline-block; width: 250px; text-align: left;">
+                    <label style="font-weight: bold; vertical-align: top; for="so_scheduler_enabled">Scheduler aktivieren:</label>
+                    <p style="margin-top: 0;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten für Kursbeginn)</p>
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                    <select name="so_scheduler_enabled" id="so_scheduler_enabled">
+                        <option value="1" <?php selected('1', $so_scheduler_enabled); ?>>Ja</option>
+                        <option value="0" <?php selected('0', $so_scheduler_enabled); ?>>Nein</option>
+                    </select>
+                </div>
             </div>
+        </div>
+        <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
             <!-- Uhrzeit der Kursschliessung -->
-            <div style="margin-bottom: 20px;">
-                <label for="so_kurs_close_at" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Uhrzeit der Kursschliessung:</label>
-                <select name="so_kurs_close_at" id="so_kurs_close_at" style="display: inline-block;">
-                    <option value="so_close_kurs_at_start_time" <?php selected('so_close_kurs_at_start_time', $so_kurs_close_at); ?>>Zum Kursbeginn</option>
-                    <option value="so_close_kurs_at_15_minutes_before_start_time" <?php selected('so_close_kurs_at_15_minutes_before_start_time', $so_kurs_close_at); ?>>15 Minuten vor Kursbeginn</option>
-                    <option value="so_close_kurs_at_30_minutes_before_start_time" <?php selected('so_close_kurs_at_30_minutes_before_start_time', $so_kurs_close_at); ?>>30 Minuten vor Kursbeginn</option>
-                </select>
-                <p style="margin-top: 5px; font-size: 0.9em;">Setzt den Zeitpunkt, ab wann der jeweilge Kurs nicht mehr bebucht werden kann.</p>
+            <div style="display: flex; align-items: flex-start;">
+                <div style="display: inline-block; width: 250px; text-align: left;">
+                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at" >Uhrzeit der Kursschliessung:</label>
+                    <p style="margin-top: 0;">Setzt den Zeitpunkt, ab wann der jeweilge Kurs nicht mehr bebucht werden kann.</p>
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                    <select name="so_kurs_close_at" id="so_kurs_close_at" style="display: inline-block;">
+                        <option value="so_close_kurs_at_start_time" <?php selected('so_close_kurs_at_start_time', $so_kurs_close_at); ?>>Zum Kursbeginn</option>
+                        <option value="so_close_kurs_at_15_minutes_before_start_time" <?php selected('so_close_kurs_at_15_minutes_before_start_time', $so_kurs_close_at); ?>>15 Minuten vor Kursbeginn</option>
+                        <option value="so_close_kurs_at_30_minutes_before_start_time" <?php selected('so_close_kurs_at_30_minutes_before_start_time', $so_kurs_close_at); ?>>30 Minuten vor Kursbeginn</option>
+                    </select>
+                </div>
             </div>
+        </div>
+
+        <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+            <!-- Feste Kurse ohne Buchung -->
+            <div style="display: flex; align-items: flex-start;">
+                <div style="display: inline-block; width: 250px; text-align: left;">
+                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names" >Kursnamen:</label>
+                    <p style="margin-top: 0;">Wähle die Kursnamen aus, welche geschlossene Kurse sind und <u>keine</u> Buchungsmöglichkeit besitzen sollen.</p>
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                <?php
+                    // Get all events with post_type 'events'
+                    echo '<select name="so_kurs_names[]" id="so_kurs_names" multiple style="display: inline-block; width: 400px;">';
+                    $events = new WP_Query( array( 'post_type' => 'events' ) );
+                    while ($events->have_posts()) {
+                        $events->the_post();
+                        $event_title = get_the_title();
+                        $selected = '';
+                        if (isset($_POST['so_kurs_names']) && in_array($event_title, $_POST['so_kurs_names'])) {
+                            $selected = 'selected';
+                        } elseif (!empty($so_kurs_names) && in_array($event_title, $so_kurs_names)) {
+                            $selected = 'selected';
+                        }
+                        echo '<option value="' . $event_title . '" ' . $selected . '>' . $event_title . '</option>';
+                    }
+                    wp_reset_postdata();
+                    echo '</select>';
+                ?>
+                </div>
+            </div>
+            <div style="display: flex; align-items: flex-start;">
+                <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Bezeichnung:</label>
+                        <p style="margin-top: 0;">Geben Sie hier die Bezeichung der festen Gruppe an.</p>
+                    </div>
+                    <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                        <input type="text" name="so_kurs_names_description" id="so_kurs_names_description" value="<?php echo esc_attr($so_kurs_names_description); ?>">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
             <!-- Buchungsfreigabe nächster Tag -->
-            <div style="margin-bottom: 20px;">
-                <label for="so_kurs_booking_open_time" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Buchungsfreigabe nächster Tag:</label>
-                <input type="text" name="so_kurs_booking_open_time" id="so_kurs_booking_open_time" value="<?php echo esc_attr($so_kurs_booking_open_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
-                <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 12:00)</span>
-                <p style="margin-top: 5px; font-size: 0.9em;">Setzt die Uhrzeit für den Folgetag, ab wann die Kurse wieder buchbar sind..</p>
+            <div style="display: flex; align-items: flex-start;">
+            <div style="display: inline-block; width: 250px; text-align: left;">
+                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at" >Buchungsfreigabe nächster Tag:</label>
+                    <p style="margin-top: 0;">Setzt die Uhrzeit für den Folgetag, ab wann die Kurse wieder buchbar sind.</p>
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                    <input type="text" name="so_kurs_booking_open_time" id="so_kurs_booking_open_time" value="<?php echo esc_attr($so_kurs_booking_open_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
+                    <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 12:00)</span>
+                </div>
             </div>
-            <!-- Name des PDF-Exports -->
-            <div style="margin-bottom: 20px;">
-                <label for="so_pdf_export_name" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Name des PDF-Exports:</label>
-                <input type="text" name="so_pdf_export_name" id="so_pdf_export_name" value="<?php echo esc_attr(get_option('so_pdf_export_name', 'gesicherte-buchungen')); ?>" style="display: inline-block; width: 300px;">
-                <p style="margin-top: 5px; font-size: 0.9em;">Gib einen Namen für den PDF-Export von gesicherten Buchungen ein. Der Standardname lautet "gesicherte-buchungen".</p>
+        </div>
+        <!-- Name des PDF-Exports -->        
+        <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+            <div style="display: flex; align-items: flex-start;">
+                <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at">Name des PDF-Exports:</label>
+                        <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
+                    </div>
+                    <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                        <input type="text" name="pdf_export_name" id="pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
+                        <span style="display: inline-block; margin-left: 5px;">.csv</span>
+                    </div>
+                </div>
             </div>
             <!-- Submit-Button -->
-            <div style="margin-top: 20px;">
-                <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;">Änderungen speichern</button>
+            <div style="margin-top: 20px;"  border-left: 3px solid #012c6d;>
+                <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;"><u>ALLE</u> Änderungen speichern</button>
             </div>
         </form>
     </div>

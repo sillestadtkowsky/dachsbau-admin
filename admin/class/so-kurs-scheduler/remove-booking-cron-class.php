@@ -2,9 +2,20 @@
     class SOScheduleBookingCronJob {
 
         function so_getSaveBookings($exportBookingIds){
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'event_booking_saves';
-            $query = "SELECT * FROM $table_name ";
+           global $wpdb;
+            $query = "SELECT bs.booking_id as Id, p.post_title AS Kurs, 
+                    DATE_FORMAT(bs.booking_datetime,'%d.%m.%Y') AS Buchungsdatum,
+                    DATE_FORMAT(bs.booking_datetime,'%H:%i') AS Buchungszeit,
+                    DATE_FORMAT(ih.start,'%H:%i') AS Kursbeginn,
+                    DATE_FORMAT(ih.end,'%H:%i') AS Kursende,
+                    bs.mitgliedsnummer as Mitgliedsnummer,
+                    bs.name as Mitgliedsname,
+                    bs.email as Mail,
+                    DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum
+                  FROM {$wpdb->prefix}event_booking_saves AS bs
+                  LEFT JOIN {$wpdb->prefix}event_hours AS ih ON ih.event_hours_id=bs.event_hours_id 
+                  LEFT JOIN {$wpdb->prefix}posts AS p ON p.id=ih.event_id ";
+
             $query .= "WHERE booking_id IN (" . implode(',', $exportBookingIds) . ")";
             $result = $wpdb->get_results( $query );
             return $result;
