@@ -5,6 +5,8 @@ if (!class_exists('WP_List_Table')) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
+require_once 'remove-booking-cron-class.php';
+
 // Einbinden von jQuery
 wp_enqueue_script('jquery');
 
@@ -193,7 +195,8 @@ class SO_EventBookingTable extends WP_List_Table
     public function get_bulk_actions()
     {
         $actions = array(
-            'delete' => 'Löschen'
+            'delete' => 'Löschen',
+            'export' => 'Exportieren'
         );
         return $actions;
     }
@@ -204,7 +207,8 @@ class SO_EventBookingTable extends WP_List_Table
         $delete_nonce = wp_create_nonce('event_booking_delete');
         $title = '<strong>' . $item['Id'] . '</strong>';
         $actions = array(
-            'delete' => sprintf('<a href="?page=%s&action=%s&booking_id=%s&_wpnonce=%s">Löschen</a>', esc_attr($_REQUEST['page']), 'event_booking_delete', absint($item['Id']), $delete_nonce)
+            'delete' => sprintf('<a href="?page=%s&action=%s&booking_id=%s&_wpnonce=%s">Löschen</a>', esc_attr($_REQUEST['page']), 'event_booking_delete', absint($item['Id']), $delete_nonce),
+            'export' => sprintf('<a href="?page=%s&action=%s&booking_id=%s&_wpnonce=%s">Exportieren</a>', esc_attr($_REQUEST['page']), 'event_booking_export', absint($item['Id']), $delete_nonce)
         );
         return sprintf('<span style="margin-left:9px;"><input type="checkbox" name="booking_id[]" value="%d" />&nbsp;&nbsp;'  .$title ."</span>" , absint($item['Id']));
     }
@@ -217,6 +221,14 @@ class SO_EventBookingTable extends WP_List_Table
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
         $bookings = isset($_REQUEST['booking_id']) ? $_REQUEST['booking_id'] : array();
     
+        if ('export' === $action) {
+            self::handle_booking_export($bookings);
+            // Aktualisiere die Adminseite
+            wp_redirect(admin_url('admin.php?page=so_schedule-booking'));
+            echo $bookings;
+            exit;
+        }
+
         if ('delete' === $action) {
             if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes') {
                 foreach ($bookings as $booking_id) {
@@ -241,5 +253,62 @@ class SO_EventBookingTable extends WP_List_Table
                 </script>';
             }
         }
+    }
+
+    public function handle_booking_export($exportBookingIds)
+    {
+        require_once 'remove-booking-cron-class.php';
+        $so_schedule_booking_cronjob = new SOScheduleBookingCronJob;
+        $bookings = $so_schedule_booking_cronjob->so_getSaveBookings($exportBookingIds);
+    
+        // Verhindert das Ausgeben von HTML-Code
+        ob_start();
+    
+        // Öffnen Sie die Ausgabedatei im Schreibmodus
+        $output = fopen('php://output', 'w');
+    
+        // Setzen Sie die Header für die CSV-Datei
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=booking_data.csv');
+        
+        // Schleife über alle Buchungen und schreibe sie in die CSV-Datei
+        foreach($bookings as $booking)
+        {
+            $data = array(
+                $booking->email,
+                $booking->mitgliedsnummer,
+                $booking->booking_id,
+                $booking->event_hours_id,
+                $booking->name,
+                $booking->booking_datetime,
+                $booking->booking_delete_datetime
+            );
+    
+            // Schreibe die Daten in die CSV-Datei
+            fputcsv($output, $data);
+        }
+    
+        // Entfernen Sie alle HTML-Tags und -Kommentare aus der Ausgabe
+        $output = ob_get_clean();
+        $output = preg_replace('/<!--(.*?)-->/', '', $output);
+        $output = preg_replace('/<\/?[\w\s]*>|<\s*[\w\s]*\/>/', '', $output);
+    
+        // Schließen Sie die Ausgabe und speichern Sie sie in einer Variablen
+        ob_end_clean();
+    
+        // Öffnen Sie die Ausgabedatei im Schreibmodus
+        $fp = fopen('php://output', 'w');
+    
+        // Schreiben Sie die Headerzeile in die CSV-Datei
+        fputcsv($fp, array('Email', 'Mitgliedsnummer', 'Booking ID', 'Event Hours ID', 'Name', 'Booking Datumzeit', 'Booking Löschdatumzeit'));
+    
+        // Schreiben Sie den gefilterten Inhalt in die CSV-Datei
+        fwrite($fp, $output);
+    
+        // Schließen Sie die Ausgabedatei
+        fclose($fp);
+    
+        // Stop PHP script execution
+        exit;
     }
 }

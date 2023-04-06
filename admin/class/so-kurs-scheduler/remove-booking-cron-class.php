@@ -1,5 +1,15 @@
 <?php
     class SOScheduleBookingCronJob {
+
+        function so_getSaveBookings($exportBookingIds){
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'event_booking_saves';
+            $query = "SELECT * FROM $table_name ";
+            $query .= "WHERE booking_id IN (" . implode(',', $exportBookingIds) . ")";
+            $result = $wpdb->get_results( $query );
+            return $result;
+        }
+        
         function so_removeOldBookings(){
             $output = 'Zu löschende Buchungen: <br> ';
     
