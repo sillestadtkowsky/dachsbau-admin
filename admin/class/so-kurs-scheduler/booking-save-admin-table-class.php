@@ -266,10 +266,12 @@ class SO_EventBookingTable extends WP_List_Table
     
         // Öffnen Sie die Ausgabedatei im Schreibmodus
         $output = fopen('php://output', 'w');
-    
+        
+        $pdfExportName = get_option( 'so_pdf_export_name' );
+
         // Setzen Sie die Header für die CSV-Datei
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename=booking_data.csv');
+        header('Content-Disposition: attachment; filename='. $pdfExportName .'.csv');
         
         // Schleife über alle Buchungen und schreibe sie in die CSV-Datei
         foreach($bookings as $booking)

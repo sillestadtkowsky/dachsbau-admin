@@ -85,6 +85,7 @@ function so_dachsbau_admin_config() {
     if (isset($_POST['submit'])) {
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
+        update_option('so_pdf_export_name', isset($_POST['so_pdf_export_name']) ? sanitize_text_field($_POST['so_pdf_export_name']) : '');
         $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
         
         // Validierung der Buchungsfreigabezeit
@@ -131,6 +132,12 @@ function so_dachsbau_admin_config() {
                 <input type="text" name="so_kurs_booking_open_time" id="so_kurs_booking_open_time" value="<?php echo esc_attr($so_kurs_booking_open_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
                 <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 12:00)</span>
                 <p style="margin-top: 5px; font-size: 0.9em;">Setzt die Uhrzeit für den Folgetag, ab wann die Kurse wieder buchbar sind..</p>
+            </div>
+            <!-- Name des PDF-Exports -->
+            <div style="margin-bottom: 20px;">
+                <label for="so_pdf_export_name" style="display: inline-block; width: 250px; text-align: left; font-weight: bold;">Name des PDF-Exports:</label>
+                <input type="text" name="so_pdf_export_name" id="so_pdf_export_name" value="<?php echo esc_attr(get_option('so_pdf_export_name', 'gesicherte-buchungen')); ?>" style="display: inline-block; width: 300px;">
+                <p style="margin-top: 5px; font-size: 0.9em;">Gib einen Namen für den PDF-Export von gesicherten Buchungen ein. Der Standardname lautet "gesicherte-buchungen".</p>
             </div>
             <!-- Submit-Button -->
             <div style="margin-top: 20px;">
