@@ -98,9 +98,13 @@ class SO_EventBookingTable extends WP_List_Table
     
         $do_search = '';
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
-
-        if(null!=$search){
-            $do_search .= ( $search ) ? $wpdb->prepare(" WHERE bs.mitgliedsnummer  = %s OR bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR bs.name LIKE '%%%s%%' or bs.email LIKE '%%%s%%'", $search, $search , $search , $search, $search) : '';
+        $is_date = strtotime($search);
+        
+        if ($is_date !== false) {
+            $searchDate = date('Y-m-d', strtotime($search));
+            $do_search .= $wpdb->prepare(" WHERE bs.booking_datetime LIKE %s", array( $searchDate.'%' ));
+        } else {
+            $do_search .= $wpdb->prepare(" WHERE bs.mitgliedsnummer = %s OR bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR bs.name LIKE '%%%s%%' OR bs.email LIKE '%%%s%%'", $search, $search, $search, $search, $search);
         }
 
         $query = "SELECT bs.booking_id as Id, p.post_title AS Kurs, 
@@ -271,7 +275,7 @@ class SO_EventBookingTable extends WP_List_Table
 
         // Setzen Sie die Header für die CSV-Datei
         header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename='. $pdfExportName .'.csv');
+        header('Content-Disposition: attachment; filename=' . $pdfExportName .'.csv');
         
         // Schleife über alle Buchungen und schreibe sie in die CSV-Datei
         foreach($bookings as $booking)
