@@ -13,7 +13,6 @@ function so_DachsbauKarowAdminMenu()
     //Add sub-menu pages
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
-    add_submenu_page('so_dachsbau-karow-admin-menu', esc_html__('Buchungen exportieren', 'timetable'), esc_html__('Buchungen exportieren', 'timetable'), 'read', 'timetable_admin_bookings_export', array(new SP_Bookings, 'bookings_export_page'));
     add_submenu_page('so_dachsbau-karow-admin-menu','Gelöscht Buchungen','Gelöscht Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu','Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
 }
@@ -65,6 +64,22 @@ function so_dachsbau_admin_info_page() {
         </div>
     </div>
     <?php
+}
+
+
+function so_dachsbau_post_type_settings()
+{
+	$timetable_events_settings = get_option("timetable_events_settings");
+	if(!$timetable_events_settings)
+	{
+		$timetable_events_settings = array(
+			"slug" => "events",
+			"label_singular" => "Event",
+			"label_plural" => "Events",
+		);
+		add_option("timetable_events_settings", $timetable_events_settings);
+	}
+	return $timetable_events_settings;
 }
 
 function so_dachsbau_admin_config() {
@@ -154,28 +169,35 @@ function so_dachsbau_admin_config() {
             <!-- Feste Kurse ohne Buchung -->
             <div style="display: flex; align-items: flex-start;">
                 <div style="display: inline-block; width: 250px; text-align: left;">
-                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names" >Kursnamen:</label>
-                    <p style="margin-top: 0;">Wähle die Kursnamen aus, welche geschlossene Kurse sind und <u>keine</u> Buchungsmöglichkeit besitzen sollen.</p>
+                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names" >Feste Gruppen:</label>
+                    <p style="margin-top: 0;">Wähle die Kursnamen aus, welche feste Kurse sind und <u>keine</u> Buchungsmöglichkeit besitzen sollen.</p>
                 </div>
                 <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
-                <?php
-                    // Get all events with post_type 'events'
-                    echo '<select name="so_kurs_names[]" id="so_kurs_names" multiple style="display: inline-block; width: 400px;">';
-                    $events = new WP_Query( array( 'post_type' => 'events' ) );
-                    while ($events->have_posts()) {
-                        $events->the_post();
-                        $event_title = get_the_title();
-                        $selected = '';
-                        if (isset($_POST['so_kurs_names']) && in_array($event_title, $_POST['so_kurs_names'])) {
-                            $selected = 'selected';
-                        } elseif (!empty($so_kurs_names) && in_array($event_title, $so_kurs_names)) {
-                            $selected = 'selected';
+                    <?php
+                        // Get all events with post_type 'events'
+                        echo '<select name="so_kurs_names[]" id="so_kurs_names" multiple style="display: inline-block; width: 400px;">';
+                        
+                        $postTypSlug = so_dachsbau_post_type_settings();
+                        $events = new WP_Query( array(
+                            'post_type' => $postTypSlug["slug"],
+                            'orderby' => 'title',
+                            'order' => 'ASC'
+                        ) );
+                        while ($events->have_posts()) {
+                            $events->the_post();
+                            $event_title = get_the_title();
+                            $event_name = get_post_field( 'post_name', $events->ID ); // Hier wird der post_name abgerufen
+                            $selected = '';
+                            if (isset($_POST['so_kurs_names']) && in_array($event_name, $_POST['so_kurs_names'])) {
+                                $selected = 'selected';
+                            } elseif (!empty($so_kurs_names) && in_array($event_name, $so_kurs_names)) {
+                                $selected = 'selected';
+                            }
+                            echo '<option value="' . $event_name . '" ' . $selected . '>' . $event_title . '</option>';
                         }
-                        echo '<option value="' . $event_title . '" ' . $selected . '>' . $event_title . '</option>';
-                    }
-                    wp_reset_postdata();
-                    echo '</select>';
-                ?>
+                        wp_reset_postdata();
+                        echo '</select>';
+                    ?>
                 </div>
             </div>
             <div style="display: flex; align-items: flex-start;">
