@@ -102,6 +102,10 @@ function so_dachsbau_admin_config() {
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
         update_option('so_pdf_export_name', isset($_POST['so_pdf_export_name']) ? sanitize_text_field($_POST['so_pdf_export_name']) : '');
         update_option('so_kurs_names_description', isset($_POST['so_kurs_names_description']) ? sanitize_text_field($_POST['so_kurs_names_description']) : '');
+        $so_kurs_names_color_background = isset( $_POST['so_kurs_names_color_background'] ) ? sanitize_hex_color( $_POST['so_kurs_names_color_background'] ) : '';
+        update_option( 'so_kurs_names_color_background', $so_kurs_names_color_background );
+        $so_kurs_names_color_text = isset( $_POST['so_kurs_names_color_text'] ) ? sanitize_hex_color( $_POST['so_kurs_names_color_text'] ) : '';
+        update_option( 'so_kurs_names_color_text', $so_kurs_names_color_text );
         $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
         
         // Validierung der Buchungsfreigabezeit
@@ -121,6 +125,8 @@ function so_dachsbau_admin_config() {
     }
 
     // Aktuelle Werte abrufen
+    $so_kurs_names_color_text = get_option('so_kurs_names_color_text', '1');
+    $so_kurs_names_color_background = get_option('so_kurs_names_color_background', '1');
     $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
@@ -208,6 +214,23 @@ function so_dachsbau_admin_config() {
                     <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
                         <input type="text" name="so_kurs_names_description" id="so_kurs_names_description" value="<?php echo esc_attr($so_kurs_names_description); ?>">
                     </div>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
+            <!-- Faerbew für Onlinekurse -->
+            <div style="display: flex; align-items: flex-start;">
+            <div style="display: inline-block; width: 250px; text-align: left;">
+                    <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_color" >Onlinkurse:</label>
+                    <p style="margin-top: 0;">Hier kannst du festlegen, mit welchen Farben ein Onlinkurs hervorgehoben werden soll. </p>
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                    <label style="vertical-align: top;" for="so_kurs_names_color_background" >Hintergrund</label>
+                    <input type="color" name="so_kurs_names_color_background" id="so_kurs_names_color_background" value="<?php echo esc_attr($so_kurs_names_color_background); ?>">
+                </div>
+                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                    <label style="vertical-align: top;" for="so_kurs_names_color_text" >Textfarbe</label>
+                    <input type="color" name="so_kurs_names_color_text" id="so_kurs_names_color_text" value="<?php echo esc_attr($so_kurs_names_color_text); ?>">
                 </div>
             </div>
         </div>
