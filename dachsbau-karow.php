@@ -87,18 +87,3 @@ function so_remove_old_bookings_function()
         return "Automat zum automatischen Löschen von Buchungen ist deaktiviert.";
     }
 }
-
-add_shortcode( 'so_remove_old_bookings_result', 'so_remove_old_bookings_result_shortcode' );
-function so_remove_old_bookings_result_shortcode() {
-    $enabled = get_option( 'so_scheduler_enabled' );
-    echo $enabled;
-
-    if ( $enabled == '1' ) {
-        require_once 'admin/class/so-kurs-scheduler/remove-booking-cron-class.php';
-        $so_schedule_booking_cronjob = new SOScheduleBookingCronJob;
-        $result = $so_schedule_booking_cronjob->so_removeOldBookings();
-        return $result; // return the result instead of echoing it
-    } else {
-        return "Automat zum automatischen Löschen von Buchungen ist deaktiviert. Value (so_scheduler_enabled): " .$enabled;
-    }
-}
