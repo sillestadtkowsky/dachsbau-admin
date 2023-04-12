@@ -33,9 +33,9 @@
                     $output .= "Booking ID: " . $booking_id . "<br>";
                 }
             } else {
+                error_log( print_r( $output) );
                 $output .= "Keine Buchungen gefunden";
             }
-    
             return $output;
         }
     
@@ -58,7 +58,7 @@
             $table_event_hours_booking = $wpdb->prefix . 'event_hours_booking';
         
             // Get the previous weekday string
-            $previous_weekday_string = self::so_getPreviousWeekday();
+            $weekday_string = self::so_getWeekday();
         
             // Get the bookings to be deleted
             
@@ -68,10 +68,12 @@
                       FROM $table_event_hours AS t
                       JOIN {$wpdb->posts} AS p ON t.weekday_id = p.ID
                       JOIN {$table_event_hours_booking} AS b ON t.event_hours_id = b.event_hours_id
-                      WHERE CONCAT('1970-01-01 ', TIME(t.start)) < DATE_ADD(CONCAT('1970-01-01 ', '$now'), INTERVAL $interval)
-                      AND SUBSTR(p.post_name, 1, 2) = '$previous_weekday_string'";
+                      WHERE CONCAT('1970-01-01 ', TIME(t.start)) < DATE_SUB(CONCAT('1970-01-01 ', '$now'), INTERVAL $interval)
+                      AND SUBSTR(p.post_name, 1, 2) = '$weekday_string'";
+                      
 
             $bookings = $wpdb->get_results($query, ARRAY_A);
+            error_log( print_r(count($bookings)) );
 
             foreach ($bookings as &$booking) {
                 if ($booking['user_id'] == 0) {
@@ -87,6 +89,7 @@
                     $booking['mitgliedsnummer'] = 'intern';
                 }
             }
+            error_log( print_r(var_dump($bookings)) );
             return $bookings;
         }
 
@@ -115,6 +118,9 @@
         
             // Save the bookings to be deleted to wp_event_booking_saves table
             if (!empty($bookings)) {
+
+                error_log( print_r('speichern') );
+
                 foreach ($bookings as $booking) {
                     $booking_id = $booking['booking_id'];
                     $event_hours_id = $booking['event_hours_id'];
@@ -155,6 +161,12 @@
             $previousWeekday = (new DateTime('yesterday', $timezone))->format('N');
             $weekdays = array('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So');
             return $weekdays[$previousWeekday - 1];
+        }
+        function so_getWeekday() {
+            $timezone = new DateTimeZone('Europe/Berlin'); // Hier die Zeitzone anpassen
+            $weekday = (new DateTime('now', $timezone))->format('N');
+            $weekdays = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
+            return $weekdays[$weekday];
         }
 
     }

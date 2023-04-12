@@ -146,7 +146,7 @@ function so_dachsbau_admin_config() {
             <div style="display: flex; align-items: flex-start;">
                 <div style="display: inline-block; width: 250px; text-align: left;">
                     <label style="font-weight: bold; vertical-align: top; for="so_scheduler_enabled">Scheduler aktivieren:</label>
-                    <p style="margin-top: 0;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten für Kursbeginn)</p>
+                    <p style="margin-top: 0;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten nach Kursbeginn)</p>
                 </div>
                 <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
                     <select name="so_scheduler_enabled" id="so_scheduler_enabled">

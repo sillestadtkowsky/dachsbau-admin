@@ -128,7 +128,7 @@ class SO_EventBookingTable extends WP_List_Table
         }
     
         // Elemente pro Seite festlegen
-        $per_page = 10;
+        $per_page = 50;
         $current_page = $this->get_pagenum();
     
         // Daten für die Tabelle abrufen

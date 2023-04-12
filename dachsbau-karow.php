@@ -6,7 +6,7 @@ ob_start();
  * Plugin Name:       dachsbau-karow
  * Plugin URI:        https://plugins-wordpress-osowsky-webdesign.info
  * Description:       Prüft beim buchen eines Kurse auf eine gültige Mitgliedsnummer und lässt das aktualisieren der Mitgliedsnummern im Admin Bereich zu.
- * Version:           2.0.12
+ * Version:           2.0.13
  * Requires at least: 6.1.1
  * Requires PHP:      7.2
  * Author:            Silvio Osowsky <i class="fas fa-heart"></i>
@@ -75,9 +75,10 @@ function so_schedule_booking_cronjob()
 add_action('so_remove_old_bookings', 'so_remove_old_bookings_function');
 function so_remove_old_bookings_function()
 {
-    $enabled = get_option('scheduler_enabled');
+    $enabled = get_option('so_scheduler_enabled');
 
     if ($enabled == '1') {
+        error_log( print_r('Automat gestartet.') );
         require_once 'admin/class/so-kurs-scheduler/remove-booking-cron-class.php';
         $so_schedule_booking_cronjob = new SOScheduleBookingCronJob;
         $result = $so_schedule_booking_cronjob->so_removeOldBookings();
@@ -85,5 +86,19 @@ function so_remove_old_bookings_function()
     }else{
         return "Automat zum automatischen Löschen von Buchungen ist deaktiviert.";
     }
+}
 
+add_shortcode( 'so_remove_old_bookings_result', 'so_remove_old_bookings_result_shortcode' );
+function so_remove_old_bookings_result_shortcode() {
+    $enabled = get_option( 'so_scheduler_enabled' );
+    echo $enabled;
+
+    if ( $enabled == '1' ) {
+        require_once 'admin/class/so-kurs-scheduler/remove-booking-cron-class.php';
+        $so_schedule_booking_cronjob = new SOScheduleBookingCronJob;
+        $result = $so_schedule_booking_cronjob->so_removeOldBookings();
+        return $result; // return the result instead of echoing it
+    } else {
+        return "Automat zum automatischen Löschen von Buchungen ist deaktiviert. Value (so_scheduler_enabled): " .$enabled;
+    }
 }
