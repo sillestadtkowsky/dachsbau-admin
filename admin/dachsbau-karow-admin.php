@@ -99,9 +99,11 @@ function so_dachsbau_admin_config() {
     // Schalter speichern
     if (isset($_POST['submit'])) {
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
+        update_option('so_kurs_strong_group_mail', isset($_POST['so_kurs_strong_group_mail']) ? sanitize_text_field($_POST['so_kurs_strong_group_mail']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
         update_option('so_pdf_export_name', isset($_POST['so_pdf_export_name']) ? sanitize_text_field($_POST['so_pdf_export_name']) : '');
         update_option('so_kurs_online_search_name', isset($_POST['so_kurs_online_search_name']) ? sanitize_text_field($_POST['so_kurs_online_search_name']) : '');
+        update_option('so_kurs_strong_group_mail_adresse', isset($_POST['so_kurs_strong_group_mail_adresse']) ? sanitize_text_field($_POST['so_kurs_strong_group_mail_adresse']) : '');
         update_option('so_kurs_names_description', isset($_POST['so_kurs_names_description']) ? sanitize_text_field($_POST['so_kurs_names_description']) : '');
         $so_kurs_online_name_color_background = isset( $_POST['so_kurs_online_name_color_background'] ) ? sanitize_hex_color( $_POST['so_kurs_online_name_color_background'] ) : '';
         update_option( 'so_kurs_online_name_color_background', $so_kurs_online_name_color_background );
@@ -129,10 +131,12 @@ function so_dachsbau_admin_config() {
     $so_kurs_online_name_color_text = get_option('so_kurs_online_name_color_text', '1');
     $so_kurs_online_name_color_background = get_option('so_kurs_online_name_color_background', '1');
     $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
+    $so_kurs_strong_group_mail = get_option('so_kurs_strong_group_mail', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
     $pdf_export_name = get_option('pdf_export_name', 'gesicherte-buchungen');
     $so_kurs_online_search_name = get_option('so_kurs_online_search_name', 'online');
+    $so_kurs_strong_group_mail_adresse = get_option('so_kurs_strong_group_mail_adresse', 'info@karowerdachse.de');
     $so_kurs_names_description = get_option('so_kurs_names_description', '** feste Gruppe **');
     $so_kurs_names = get_option('so_kurs_names', array());
 
@@ -142,7 +146,7 @@ function so_dachsbau_admin_config() {
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
         <form method="post" style="padding: 20px 0px 20px 0px;">
             <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235); border-left: 3px solid #012c6d;">
-                <!-- Scheduler aktivieren -->
+                <h3>Automat zur Buchungssicherung und Verwaltung</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top; for="so_scheduler_enabled">Scheduler aktivieren:</label>
@@ -157,7 +161,7 @@ function so_dachsbau_admin_config() {
                 </div>
             </div>
             <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
-                <!-- Uhrzeit der Kursschliessung -->
+                <h3>Steuerung der Kursschliessung</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at" >Uhrzeit der Kursschliessung:</label>
@@ -173,7 +177,7 @@ function so_dachsbau_admin_config() {
                 </div>
             </div>
             <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
-                <!-- Feste Kurse ohne Buchung -->
+                <h3>Kennzeichnung fester Gruppen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names" >Feste Gruppen:</label>
@@ -215,9 +219,25 @@ function so_dachsbau_admin_config() {
                             <input type="text" name="so_kurs_names_description" id="so_kurs_names_description" value="<?php echo esc_attr($so_kurs_names_description); ?>">
                     </div>
                 </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">eMail Info:</label>
+                        <p style="margin-top: 0;">Geben Sie hier die Bezeichung der festen Gruppe an.</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px; padding: 0px 5px 0px 10px">
+                        <select name="so_kurs_strong_group_mail" id="so_kurs_strong_group_mail">
+                            <option value="1" <?php selected('1', $so_kurs_strong_group_mail); ?>>Ja</option>
+                            <option value="0" <?php selected('0', $so_kurs_strong_group_mail); ?>>Nein</option>
+                        </select>
+                    </div>
+                    <div style="display: block; margin-top: 10px;">
+                        <label style="vertical-align: top; padding: 0px 5px 0px 10px;" for="so_kurs_online_search_name" >eMailadresse:</label>
+                        <input type="text" name="so_kurs_strong_group_mail_adresse" id="o_kurs_strong_group_mail_adresse" value="<?php echo esc_attr($so_kurs_strong_group_mail_adresse); ?>">
+                    </div>
+                </div>
             </div>
             <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
-                <!-- Faerbew für Onlinekurse -->
+                <h3>Kennzeichnung online Gruppen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_color" >Onlinekurse:</label>
@@ -237,8 +257,8 @@ function so_dachsbau_admin_config() {
                     </div>
                 </div>
             </div>
-            <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
-                <!-- Buchungsfreigabe nächster Tag -->
+            <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+                <h3>Startzeit erneute Buchungen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at" >Buchungsfreigabe nächster Tag:</label>
@@ -250,19 +270,20 @@ function so_dachsbau_admin_config() {
                     </div>
                 </div>
             </div>
-            <!-- Name des PDF-Exports -->        
-            <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+              
+            <div style="padding: 10px; margin-bottom: 20px; border-left: 3px solid #012c6d;">
+                <h3>Auwertung und Dokumentation</h3>    
                 <div style="display: flex; align-items: flex-start;">
-                    <div style="display: inline-block; width: 250px; text-align: left;">
-                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at">Name des PDF-Exports:</label>
-                        <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
-                    </div>
-                    <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
-                        <input type="text" name="pdf_export_name" id="pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
-                        <span style="display: inline-block; margin-left: 5px;">.csv</span>
+                        <div style="display: inline-block; width: 250px; text-align: left;">
+                            <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at">Name des PDF-Exports:</label>
+                            <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
+                        </div>
+                        <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                            <input type="text" name="pdf_export_name" id="pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
+                            <span style="display: inline-block; margin-left: 5px;">.csv</span>
+                        </div>
                     </div>
                 </div>
-            </div>
                 <!-- Submit-Button -->
             <div style="margin-top: 20px;"  border-left: 3px solid #012c6d;>
                     <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;"><u>ALLE</u> Änderungen speichern</button>
