@@ -156,17 +156,11 @@
                 }
             }
         }
-        function so_getPreviousWeekday() {
-            $timezone = new DateTimeZone('Europe/Berlin'); // Hier die Zeitzone anpassen
-            $previousWeekday = (new DateTime('yesterday', $timezone))->format('N');
-            $weekdays = array('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So');
-            return $weekdays[$previousWeekday - 1];
-        }
+        
         function so_getWeekday() {
             $timezone = new DateTimeZone('Europe/Berlin'); // Hier die Zeitzone anpassen
-            $weekday = (new DateTime('now', $timezone))->format('N');
-            $weekdays = array('So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa');
+            $weekday = (new DateTime('now', $timezone))->format('N') - 1;
+            $weekdays = array('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So');
             return $weekdays[$weekday];
         }
-
     }
