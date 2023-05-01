@@ -222,7 +222,7 @@ function so_dachsbau_admin_config() {
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
                         <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">eMail Info:</label>
-                        <p style="margin-top: 0;">Geben Sie hier die Bezeichung der festen Gruppe an.</p>
+                        <p style="margin-top: 0;">Soll ein Link mit einer eMail Adresse gezeigt werden?.</p>
                     </div>
                     <div style="display: block; margin-top: 10px; padding: 0px 5px 0px 10px">
                         <select name="so_kurs_strong_group_mail" id="so_kurs_strong_group_mail">
