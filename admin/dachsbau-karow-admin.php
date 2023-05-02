@@ -134,7 +134,7 @@ function so_dachsbau_admin_config() {
     $so_kurs_strong_group_mail = get_option('so_kurs_strong_group_mail', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
-    $pdf_export_name = get_option('pdf_export_name', 'gesicherte-buchungen');
+    $pdf_export_name = get_option('so_pdf_export_name', 'gesicherte-buchungen');
     $so_kurs_online_search_name = get_option('so_kurs_online_search_name', 'online');
     $so_kurs_strong_group_mail_adresse = get_option('so_kurs_strong_group_mail_adresse', 'info@karowerdachse.de');
     $so_kurs_names_description = get_option('so_kurs_names_description', '** feste Gruppe **');
@@ -279,7 +279,7 @@ function so_dachsbau_admin_config() {
                             <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
                         </div>
                         <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
-                            <input type="text" name="pdf_export_name" id="pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
+                            <input type="text" name="so_pdf_export_name" id="so_pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
                             <span style="display: inline-block; margin-left: 5px;">.csv</span>
                         </div>
                     </div>
