@@ -59,7 +59,14 @@ require_once MC_PLUGIN_PLUGIN_DIR .  '/inc/wp-enqueue.php';
 
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/db.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/utils.class.php';
+require_once MC_PLUGIN_PLUGIN_DIR .  '/class/map_metabox.class.php';
 require_once MC_PLUGIN_PLUGIN_DIR .  '/class/members.table.class.php';
+
+// Initialisierung der Klasse
+function initialize_map_meta_box() {
+    new CustomMetaBox();
+}
+add_action( 'plugins_loaded', 'initialize_map_meta_box' );
 
 require_once MC_PLUGIN_PLUGIN_DIR .  '/admin/dachsbau-karow-admin.php';
 
