@@ -1,5 +1,22 @@
 <?php
 
+/*
+Plugin Name: Mein Plugin
+*/
+
+require_once( plugin_dir_path( __FILE__ ) . 'class/so-dachsbau-dashboard-class.php' );
+new So_Dachsbau_Dashboard_Widget();
+
+// update DB
+/*
+    register_activation_hook( __FILE__, 'my_plugin_activation' );
+
+    function my_plugin_activation() {
+        global $wpdb;
+        $wpdb->query( "ALTER TABLE {$wpdb->prefix}event_hours_booking ADD visited int(6);");
+
+    }
+*/
 
 /*
 * ###############################
@@ -420,3 +437,5 @@ function so_mitgliederliste()
 
       echo $html;
   }
+
+  
