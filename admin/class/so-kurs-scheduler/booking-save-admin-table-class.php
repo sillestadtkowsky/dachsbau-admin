@@ -53,7 +53,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Mitgliedsname' => 'Mitgliedsname',
             'Mail' => 'Mail',
             'Mitgliedsnummer' => 'Mitgliedsnummer',
-            'Teilgenommen' => 'Teilgenommen',
+            'Status' => 'Status',
             'Loeschdatum' => 'Loeschdatum'
         );
         return $columns;
@@ -72,7 +72,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Kursbeginn' => 'Kursbeginn',
             'Mitgliedsname' => 'Mitgliedsname',
             'Mitgliedsnummer' => 'Mitgliedsnummer',
-            'Teilgenommen' => 'Teilgenommen',
+            'Status' => 'Status',
             'Mail' => 'Mail'
         );
         return $filterable_columns;
@@ -95,7 +95,7 @@ class SO_EventBookingTable extends WP_List_Table
           'Kursbeginn',
           'Mitgliedsname',
           'Mitgliedsnummer',
-          'Teilgenommen',
+          'Status',
           'Mail'
         );
     
@@ -107,7 +107,7 @@ class SO_EventBookingTable extends WP_List_Table
             $searchDate = date('Y-m-d', strtotime($search));
             $do_search .= $wpdb->prepare(" WHERE bs.booking_datetime LIKE %s", array( $searchDate.'%' ));
         } else {
-            $visited = strtolower($search) === 'nein'? 0 : 1;
+            $visited = strtolower($search) === 'gefehlt'? 0 : 1;
             $do_search .= $wpdb->prepare(" WHERE bs.mitgliedsnummer = %s OR bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR bs.name LIKE '%%%s%%' OR bs.email LIKE '%%%s%%' OR bs.visited = %s", $search, $search, $search, $search, $search, $visited);
         }
 
@@ -117,7 +117,7 @@ class SO_EventBookingTable extends WP_List_Table
                     DATE_FORMAT(ih.start,'%H:%i') AS Kursbeginn,
                     DATE_FORMAT(ih.end,'%H:%i') AS Kursende,
                     bs.mitgliedsnummer as Mitgliedsnummer,
-                    bs.visited as Teilgenommen,
+                    bs.visited as Status,
                     bs.name as Mitgliedsname,
                     CONCAT('<a href=\"mailto:', bs.email, '\">', bs.email, '</a>') as Mail,
                     DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum
@@ -169,11 +169,11 @@ class SO_EventBookingTable extends WP_List_Table
             case 'Mitgliedsnummer':
             case 'Loeschdatum':
                 return $item[ $column_name ];
-            case 'Teilgenommen':
+            case 'Status':
                 if((int)$item[ $column_name ] === 1){
-                    return 'Ja';
+                    return 'teilgenommen';
                 }else{
-                    return 'Nein';
+                    return 'gefehlt';
                 }
             default:
                 return print_r( $item, false ) ;
@@ -191,7 +191,7 @@ class SO_EventBookingTable extends WP_List_Table
             'Kursende' => array('Kursende', true),
             'Mitgliedsname' => array('Mitgliedsname', true),
             'Mitgliedsnummer' => array('Mitgliedsnummer', true),
-            'Teilgenommen' => array('Teilgenommen', true),
+            'Status' => array('Status', true),
             'Mail' => array('Mail', true),
             'Loeschdatum' => array('Loeschdatum', true)
         );
@@ -301,7 +301,7 @@ class SO_EventBookingTable extends WP_List_Table
                 $booking->Buchungsdatum,
                 $booking->Mitgliedsname,
                 $booking->Mitgliedsnummer,
-                $booking->Teilgenommen,
+                $booking->visited === '0' ? "gefehlt" : "teilgenommen",
                 $booking->Mail,               
                 $booking->Buchungszeit,
                 $booking->Loeschdatum
@@ -323,7 +323,7 @@ class SO_EventBookingTable extends WP_List_Table
         $fp = fopen('php://output', 'w');
     
         // Schreiben Sie die Headerzeile in die CSV-Datei
-        fputcsv($fp, array('Id', 'Kurs', 'Kursbeginn', 'Kursende', 'Buchungsdatum', 'Mitgliedsname', 'Mitgliedsnummer', 'Teilgenommen', 'Mail', 'Buchungszeit', 'Loeschdatum'));
+        fputcsv($fp, array('Id', 'Kurs', 'Kursbeginn', 'Kursende', 'Buchungsdatum', 'Mitgliedsname', 'Mitgliedsnummer', 'Status', 'Mail', 'Buchungszeit', 'Loeschdatum'));
     
         // Schreiben Sie den gefilterten Inhalt in die CSV-Datei
         fwrite($fp, $output);
