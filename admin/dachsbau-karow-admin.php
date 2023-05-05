@@ -127,13 +127,15 @@ function so_dachsbau_admin_config() {
         $so_kurs_online_name_color_text = isset( $_POST['so_kurs_online_name_color_text'] ) ? sanitize_hex_color( $_POST['so_kurs_online_name_color_text'] ) : '';
         update_option( 'so_kurs_online_name_color_text', $so_kurs_online_name_color_text );
         $so_kurs_booking_open_time = isset($_POST['so_kurs_booking_open_time']) ? sanitize_text_field($_POST['so_kurs_booking_open_time']) : '';
+        $so_scheduler_time = isset($_POST['so_scheduler_time']) ? sanitize_text_field($_POST['so_scheduler_time']) : '';
         
         // Validierung der Buchungsfreigabezeit
-        if (preg_match('/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/', $so_kurs_booking_open_time)) {
+        if (preg_match('/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/', $so_kurs_booking_open_time) && preg_match('/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/', $so_scheduler_time)) {
             update_option('so_kurs_booking_open_time', $so_kurs_booking_open_time);
-            add_settings_error('my_setting', 'success', 'Die Einstellungen wurden erfolgreich gespeichert.', 'updated');
+            update_option('so_scheduler_time', $so_scheduler_time);
+            add_settings_error('so_kurs_save_time', 'success', 'Die Einstellungen wurden erfolgreich gespeichert.', 'updated');
         } else {
-            add_settings_error('so_kurs_booking_open_time', 'invalid_time_format', 'Bitte gib eine gültige Uhrzeit ein (Format: Stunde und Minute, z.B. 12:00).');
+            add_settings_error('so_kurs_save_time', 'invalid_time_format', 'Bitte gib eine gültige Uhrzeit ein (Format: Stunde und Minute, z.B. 12:00).');
         }
 
 
@@ -151,6 +153,7 @@ function so_dachsbau_admin_config() {
     $so_kurs_strong_group_mail = get_option('so_kurs_strong_group_mail', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
+    $so_scheduler_time  = get_option('so_scheduler_time', '23:00');
     $pdf_export_name = get_option('so_pdf_export_name', 'gesicherte-buchungen');
     $so_kurs_online_search_name = get_option('so_kurs_online_search_name', 'online');
     $so_kurs_strong_group_mail_adresse = get_option('so_kurs_strong_group_mail_adresse', 'info@karowerdachse.de');
@@ -166,14 +169,24 @@ function so_dachsbau_admin_config() {
                 <h3>Automat zur Buchungssicherung und Verwaltung</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
-                        <label style="font-weight: bold; vertical-align: top; for="so_scheduler_enabled">Scheduler aktivieren:</label>
-                        <p style="margin-top: 0;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen. (Standartwert 30 Minuten nach Kursbeginn)</p>
+                        <label style="font-weight: bold; vertical-align: top;" for="so_scheduler_enabled">Scheduler aktivieren:</label>
+                        <p style="margin-top: 0;">Aktiviert den Timer, um automatisch Buchungen für einen bereits durchgeführten Kurs zu sichern und danach die Buchungen zu löschen.</p>
                     </div>
                     <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
                         <select name="so_scheduler_enabled" id="so_scheduler_enabled">
                             <option value="1" <?php selected('1', $so_scheduler_enabled); ?>>Ja</option>
                             <option value="0" <?php selected('0', $so_scheduler_enabled); ?>>Nein</option>
                         </select>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_scheduler_time">Uhrzeit:</label>
+                        <p style="margin-top: 0;">Uhrzeit für das automatische durchführen der Buchungssicherung.</p>
+                    </div>
+                    <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                        <input type="text" name="so_scheduler_time" id="so_scheduler_time" value="<?php echo esc_attr($so_scheduler_time); ?>" style="display: inline-block; width: 100px;" pattern="\d{1,2}:\d{2}">
+                        <span style="display: inline-block; margin-left: 5px;">(Format: Stunde und Minute, z.B. 23:00)</span>
                     </div>
                 </div>
             </div>

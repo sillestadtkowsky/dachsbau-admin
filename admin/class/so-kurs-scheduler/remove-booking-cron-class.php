@@ -69,8 +69,8 @@
                       FROM $table_event_hours AS t
                       JOIN {$wpdb->posts} AS p ON t.weekday_id = p.ID
                       JOIN {$table_event_hours_booking} AS b ON t.event_hours_id = b.event_hours_id
-                      WHERE CONCAT('1970-01-01 ', TIME(t.start)) < DATE_SUB(CONCAT('1970-01-01 ', '$now'), INTERVAL $interval)
-                      AND SUBSTR(p.post_name, 1, 2) = '$weekday_string'";
+                      WHERE SUBSTR(p.post_name, 1, 2) = '$weekday_string'";
+                      /*WHERE CONCAT('1970-01-01 ', TIME(t.start)) < DATE_SUB(CONCAT('1970-01-01 ', '$now'), INTERVAL $interval) AND SUBSTR(p.post_name, 1, 2) = '$weekday_string'";*/
                       
 
             $bookings = $wpdb->get_results($query, ARRAY_A);
