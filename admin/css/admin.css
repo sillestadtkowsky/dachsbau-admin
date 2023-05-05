@@ -4,9 +4,16 @@ DACHSBAU Admin Styles
 
 
 .so-dash-heutige-kurse{
+    min-height: 140px;
     max-height: 240px;
     overflow: scroll;
 }
+.so-dash-news{
+    min-height: 140px;
+    max-height: 140px;
+    overflow: scroll;
+}
+
 
 
 .help-li{

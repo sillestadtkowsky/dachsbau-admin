@@ -37,6 +37,7 @@ class So_Dachsbau_Dashboard_Widget {
     public function so_dachsbau_dashboard_neuigkeiten() {
         $output = '<div>';
         $output .= '<h3><b>News</b></h3>';
+        $output .= '<div class="so-dash-news">';
         $output .= '<p>';
         $output .= '<strong>';
         $output .= '05.05.2023';
@@ -55,6 +56,7 @@ class So_Dachsbau_Dashboard_Widget {
         $output .= '<li>- Dashboard-Widget entwickelt.</li>';
         $output .= '</ul>';
         $output .= '</p>';
+        $output .= '</div>';
         $output .= '</div>';
         return $output;
     }
