@@ -2,6 +2,13 @@
 DACHSBAU Admin Styles
 ********************************/
 
+
+.so-dash-heutige-kurse{
+    max-height: 240px;
+    overflow: scroll;
+}
+
+
 .help-li{
     padding: 0 10px;
     margin: 0;

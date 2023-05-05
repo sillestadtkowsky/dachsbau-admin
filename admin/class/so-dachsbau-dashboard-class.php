@@ -91,6 +91,7 @@ class So_Dachsbau_Dashboard_Widget {
         $anzahl = count($data);
         $output = '<div>';
         $output .= '<h3><b>Heutige Kurse (' . $anzahl. ')</b></h3>';
+        $output .= '<div class="so-dash-heutige-kurse">';
         $output .= '<p>';
         if ($anzahl > 0) {
             // Es wurden Ergebnisse zurückgegeben
@@ -116,7 +117,7 @@ class So_Dachsbau_Dashboard_Widget {
         }
 
         $output .= '</p>';
-        $output .= '</div>';
+        $output .= '</div></div>';
         return $output;
     }
     function findWeekDayString() {
