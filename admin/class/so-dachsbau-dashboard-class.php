@@ -39,6 +39,15 @@ class So_Dachsbau_Dashboard_Widget {
         $output .= '<h3><b>News</b></h3>';
         $output .= '<p>';
         $output .= '<strong>';
+        $output .= '05.05.2023';
+        $output .= '</strong><br>';
+        $output .= '<ul>';
+        $output .= '<li>- Der Scheduler wurde auf eine variable und im Konfigurationsbereich definierbare Uhrzeit umgestellt.';
+        $output .= '<br>Innerhalb der im Konfigurationsbereich eingestellten Uhrzeit plus 1 Stunde werden <u>alle Buchungen des aktuellen Tages</u> gesichert..</li>';
+        $output .= '</ul>';
+        $output .= '</p>';
+        $output .= '<p>';
+        $output .= '<strong>';
         $output .= '03.05.2023';
         $output .= '</strong><br>';
         $output .= '<ul>';
