@@ -329,16 +329,25 @@ class SO_EventBookingTable extends WP_List_Table
 
     public function extra_tablenav($which) {
         if ($which == 'top') {
-            echo self::soFilterSaveBookings();
-            echo self::soFilterEventVisited();
-            echo '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
-            echo '</div>';
+            $output = '<div class="alignleft actions">';
+            $output .= self::soFilterAll();
+            $output .= self::soFilterSaveBookings();
+            $output .= self::soFilterEventVisited();
+            $output .= '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
+            $output .= '</div>';
+            echo $output;
         }
     }
+
+    public function soFilterAll(){
+        $output = '';
+        $output .= '<label class="screen-reader-text" for="search-search-input">Finden:</label>';
+        $output .= '<input type="search" id="search-search-input" name="s" value="">';
+        return $output;
+    }
+
     public function soFilterEventVisited() {
         $output = '';
-
-        $output .= '<div class="alignleft actions">';
         $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
         $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
         $output .= '<option value="">Alle Status</option>';
@@ -357,7 +366,6 @@ class SO_EventBookingTable extends WP_List_Table
 
         // Erstelle das $options Array aus der Datenbank-Abfrage
 
-        $output .= '<div class="alignleft actions">';
         $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
         $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
         $output .= '<option value="">Alle Kurse</option>';

@@ -334,7 +334,6 @@ function so_schedule_booking_page() {
         <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung löschen. :)</p>
         <form method="post">
          <input type="hidden" name="page" value="wp_list_table_class" />
-        <?php $booking_list_table->search_box('Finden', 'search');?>
         <h3>Vergangene Buchungen </h3>
         <?php $booking_list_table->display(); ?>
         </form>
