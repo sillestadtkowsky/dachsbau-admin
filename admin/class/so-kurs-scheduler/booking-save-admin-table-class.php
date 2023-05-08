@@ -46,6 +46,7 @@ class SO_EventBookingTable extends WP_List_Table
         $columns = array(
             'Id' => '<span style="margin-left:4px;"><input type="checkbox" id="check-all"/>&nbsp;&nbsp;Id</span>', // Checkbox-Spalte zum Löschen
             'Kurs' => 'Kurs',
+            'Kursdatum' => 'Kursdatum',
             'Buchungsdatum' => 'Buchungsdatum',
             'Buchungszeit' => 'Buchungszeit',
             'Kursbeginn' => 'Kursbeginn',
@@ -56,6 +57,17 @@ class SO_EventBookingTable extends WP_List_Table
             'Status' => 'Status',
             'Loeschdatum' => 'Loeschdatum'
         );
+
+                // Get user preferences
+        $user_options = get_user_option( 'my_screen_options', array() );
+
+                // Check if user has hidden any columns
+        if ( isset( $user_options['columns'] ) ) {
+            foreach ( $user_options['columns'] as $column ) {
+                unset( $columns[ $column ] );
+            }
+        }
+        
         return $columns;
     }
 
@@ -68,6 +80,7 @@ class SO_EventBookingTable extends WP_List_Table
     {
         $filterable_columns = array(
             'Kurs' => 'Kurs',
+            'Kursdatum' => 'Kursdatum',
             'Buchungsdatum' => 'Buchungsdatum',
             'Kursbeginn' => 'Kursbeginn',
             'Mitgliedsname' => 'Mitgliedsname',
@@ -77,6 +90,17 @@ class SO_EventBookingTable extends WP_List_Table
         );
         return $filterable_columns;
     }
+
+    function get_views() {
+        $views = array();
+        $current = isset( $_GET['post_status'] ) ? $_GET['post_status'] : 'all';
+     
+        $views['all'] = sprintf( '<a href="%s" %s>%s</a>', remove_query_arg( 'post_status' ), $current === 'all' ? 'class="current"' : '', __( 'All', 'textdomain' ) );
+        $views['publish'] = sprintf( '<a href="%s" %s>%s</a>', add_query_arg( 'post_status', 'publish' ), $current === 'publish' ? 'class="current"' : '', __( 'Published', 'textdomain' ) );
+        $views['draft'] = sprintf( '<a href="%s" %s>%s</a>', add_query_arg( 'post_status', 'draft' ), $current === 'draft' ? 'class="current"' : '', __( 'Drafts', 'textdomain' ) );
+     
+        return $views;
+     }
 
     #
     /**
@@ -91,6 +115,7 @@ class SO_EventBookingTable extends WP_List_Table
         global $wpdb;
         $searchcol = array(
           'Kurs',
+          'Kursdatum',
           'Buchungsdatum',
           'Kursbeginn',
           'Mitgliedsname',
@@ -98,39 +123,40 @@ class SO_EventBookingTable extends WP_List_Table
           'Status',
           'Mail'
         );
-    
+
         $do_search = '';
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
         $is_date = strtotime($search);
 
-        if ($is_date !== false) {
-            $searchDate = date('Y-m-d', strtotime($search));
-            $do_search .= $wpdb->prepare(" WHERE bs.booking_datetime LIKE %s", array( $searchDate.'%' ));
-        } else {
-            $visited = strtolower($search) === 'gefehlt'? 0 : 1;
-            $do_search .= $wpdb->prepare(" WHERE bs.mitgliedsnummer = %s OR bs.booking_id = %s OR p.post_title LIKE '%%%s%%' OR bs.name LIKE '%%%s%%' OR bs.email LIKE '%%%s%%' OR bs.visited = %s", $search, $search, $search, $search, $search, $visited);
+        $text_kurs_filter = isset($_REQUEST['select-kurs-filter']) ? $_REQUEST['select-kurs-filter'] : '';
+        $select_visited_filter = isset($_REQUEST['select-Visited-filter']) ? $_REQUEST['select-Visited-filter'] : '';
+
+        if (!empty($select_visited_filter)) {
+            if($select_visited_filter==="gefehlt"){
+                $do_search .= $wpdb->prepare(" AND bs.visited = 0" );
+            }
+            if($select_visited_filter==="teilgenommen"){
+                $do_search .= $wpdb->prepare(" AND bs.visited = 1");
+            }
         }
 
-        $query = "SELECT bs.booking_id as Id, p.post_title AS Kurs, 
-                    DATE_FORMAT(bs.booking_datetime,'%d.%m.%Y') AS Buchungsdatum,
-                    DATE_FORMAT(bs.booking_datetime,'%H:%i') AS Buchungszeit,
-                    DATE_FORMAT(ih.start,'%H:%i') AS Kursbeginn,
-                    DATE_FORMAT(ih.end,'%H:%i') AS Kursende,
-                    bs.mitgliedsnummer as Mitgliedsnummer,
-                    bs.visited as Status,
-                    bs.name as Mitgliedsname,
-                    CONCAT('<a href=\"mailto:', bs.email, '\">', bs.email, '</a>') as Mail,
-                    DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum
-                  FROM {$wpdb->prefix}event_booking_saves AS bs
-                  LEFT JOIN {$wpdb->prefix}event_hours AS ih ON ih.event_hours_id=bs.event_hours_id 
-                  LEFT JOIN {$wpdb->prefix}posts AS p ON p.id=ih.event_id " . $do_search;
+        if (!empty($text_kurs_filter)) {
+            $do_search .= $wpdb->prepare(" AND ih.event_hours_id = %s", array( $text_kurs_filter ));
+        }
+        
+        if ($is_date !== false) {
+            $searchDate = date('Y-m-d', strtotime($search));
+            $do_search .= $wpdb->prepare(" AND  (bs.booking_datetime LIKE %s OR bs.eventDate LIKE %s)", array( $searchDate.'%', $searchDate.'%' ));
+        } else {
+            $do_search .= $wpdb->prepare(" AND  (bs.mitgliedsnummer = %s OR bs.name LIKE '%%%s%%' OR bs.email LIKE '%%%s%%')", $search, $search, $search);
+        }
+
+
         
         // Sortierung hinzufügen
         $orderby = $this->get_orderby();
         $order = $this->get_order();
-        if (!empty($orderby)) {
-            $query .= " ORDER BY $orderby $order";
-        }
+
     
         // Elemente pro Seite festlegen
         $per_page = 50;
@@ -138,9 +164,27 @@ class SO_EventBookingTable extends WP_List_Table
     
         // Daten für die Tabelle abrufen
         //$query .= " LIMIT " . ($current_page - 1) * $per_page . ", $per_page";
-        $data = $wpdb->get_results($query);
+
+        $data =  MC_DB::getSaveBookings($do_search, $orderby, $order);
         $total_items = count($data);
-    
+
+        // Zeige die Option zum Anpassen der Ansicht
+        $current_screen = get_current_screen();
+        $current_screen->render_per_page_options();
+        
+        // Hole die Werte für Spalten und Zeilen aus der URL
+        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 20;
+        $hidden_columns = get_hidden_columns( 'wp-list-table' );
+ 
+        // Weitere Tabellenvorbereitungen hier
+        // ...
+ 
+        // Rufe die Daten ab und setze sie in die Tabelle ein
+        $this->items = $this->get_table_data();
+ 
+        // Setze die Spalten ein
+        $this->_column_headers = $this->get_column_info();
+
         // Tabelle konfigurieren
         $this->set_pagination_args(array(
             'total_items' => $total_items,
@@ -155,11 +199,22 @@ class SO_EventBookingTable extends WP_List_Table
         $this->process_bulk_action();
     }
 
+    function get_hidden_columns() {
+        $user_id = get_current_user_id();
+        $screen_id = 'wp-list-table'; // Der ID-String für die Tabelle, für die Sie die ausgeblendeten Spalten abrufen möchten.
+        $screen_options = get_user_meta( $user_id, 'manage' . $screen_id . 'columnshidden', true );
+        if ( empty( $screen_options ) || ! is_array( $screen_options ) ) {
+            $screen_options = array();
+        }
+        return $screen_options;
+    }
+
     public function column_default( $item, $column_name ) {
         $item = (array) $item; 
         switch ( $column_name ) {
             case 'Id':
             case 'Kurs':
+            case 'Kursdatum':
             case 'Buchungsdatum':
             case 'Buchungszeit':
             case 'Kursbeginn':
@@ -185,6 +240,7 @@ class SO_EventBookingTable extends WP_List_Table
         $sortable_columns = array(
             'Id' => array('Id', true),
             'Kurs' => array('Kurs', true),
+            'Kursdatum' => array('Kurs', true),
             'Buchungsdatum' => array('Buchungsdatum', true),
             'Buchungszeit' => array('Buchungszeit', true),
             'Kursbeginn' => array('Kursbeginn', true),
@@ -271,6 +327,79 @@ class SO_EventBookingTable extends WP_List_Table
         }
     }
 
+    public function extra_tablenav($which) {
+        if ($which == 'top') {
+            echo self::soFilterSaveBookings();
+            echo self::soFilterEventVisited();
+            echo '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
+            echo '</div>';
+        }
+    }
+    public function soFilterEventVisited() {
+        $output = '';
+
+        $output .= '<div class="alignleft actions">';
+        $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
+        $output .= '<option value="">Alle Status</option>';
+        
+        $output .= '<option value="gefehlt">gefehlt</option>';
+        $output .= '<option value="teilgenommen">teilgenommen</option>';
+
+        $output .= '</select>';
+        return $output;
+    }
+
+    public function soFilterSaveBookings() {
+        $output = '';
+        $args = [];
+        $bookings=  MC_DB::getSaveBookings(null,null,null);
+
+        // Erstelle das $options Array aus der Datenbank-Abfrage
+
+        $output .= '<div class="alignleft actions">';
+        $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
+        $output .= '<option value="">Alle Kurse</option>';
+        
+        $options = array();
+        foreach ($bookings as $booking) {
+            $key = $booking->event_hours_id;
+            $options[$key] = array(
+                'event_hours_id' => $booking -> event_hours_id,
+                'Kurs' => $booking -> Kurs,
+                'post_title' => $booking -> post_title,
+                'Kursbeginn' => $booking -> Kursbeginn,
+            );
+        }
+        $options = array_values($options); // Reindex the array
+
+        // Sortiere das Array nach dem event_title
+        usort($options, function($a, $b) {
+            $cmp1 = strnatcasecmp($a['Kurs'], $b['Kurs']);
+            if ($cmp1 !== 0) {
+                return $cmp1;
+            }
+            $cmp2 = strcmp($a['post_title'], $b['post_title']);
+            if ($cmp2 !== 0) {
+                return $cmp2;
+            }
+            $cmp3 = strcmp($a['Kursbeginn'], $b['Kursbeginn']);
+            return $cmp3;
+        });        
+
+        foreach ($options as $option) {
+            $selected = '';
+            if (isset($_GET['select-kurs-filter'])) {
+                $selected = ($_GET['select-kurs-filter'] == $option['event_id']) ? 'selected="selected"' : '';
+            }
+            $output .= '<option value="' . esc_html($option['event_hours_id']) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
+        }
+        $output .= '</select>';
+        return $output;
+    }
+
+
     public function handle_booking_export($exportBookingIds)
     {
         require_once 'remove-booking-cron-class.php';
@@ -296,6 +425,7 @@ class SO_EventBookingTable extends WP_List_Table
             $data = array(
                 $booking->Id,
                 $booking->Kurs,
+                $booking->Kursdatum,
                 $booking->Kursbeginn,
                 $booking->Kursende,
                 $booking->Buchungsdatum,
@@ -323,7 +453,7 @@ class SO_EventBookingTable extends WP_List_Table
         $fp = fopen('php://output', 'w');
     
         // Schreiben Sie die Headerzeile in die CSV-Datei
-        fputcsv($fp, array('Id', 'Kurs', 'Kursbeginn', 'Kursende', 'Buchungsdatum', 'Mitgliedsname', 'Mitgliedsnummer', 'Status', 'Mail', 'Buchungszeit', 'Loeschdatum'));
+        fputcsv($fp, array('Id', 'Kurs', 'Kursbeginn', 'Kursdatum', 'Kursende', 'Buchungsdatum', 'Mitgliedsname', 'Mitgliedsnummer', 'Status', 'Mail', 'Buchungszeit', 'Loeschdatum'));
     
         // Schreiben Sie den gefilterten Inhalt in die CSV-Datei
         fwrite($fp, $output);
@@ -334,4 +464,5 @@ class SO_EventBookingTable extends WP_List_Table
         // Stop PHP script execution
         exit;
     }
+    
 }

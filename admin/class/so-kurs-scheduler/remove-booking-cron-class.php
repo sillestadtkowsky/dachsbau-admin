@@ -11,6 +11,7 @@
                     bs.mitgliedsnummer as Mitgliedsnummer,
                     bs.name as Mitgliedsname,
                     bs.email as Mail,
+                    bs.eventDate as Kursdatum
                     DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum,
                     bs.visited
                   FROM {$wpdb->prefix}event_booking_saves AS bs
@@ -65,7 +66,7 @@
             
             $now = date('H:i:s');
 
-            $query = "SELECT b.booking_id, b.event_hours_id, b.user_id, b.booking_datetime, b.guest_id, b.visited
+            $query = "SELECT b.booking_id, b.event_hours_id, b.user_id, b.booking_datetime, b.guest_id, b.visited, b.eventDate
                       FROM $table_event_hours AS t
                       JOIN {$wpdb->posts} AS p ON t.weekday_id = p.ID
                       JOIN {$table_event_hours_booking} AS b ON t.event_hours_id = b.event_hours_id
@@ -130,6 +131,7 @@
                     $email = $booking['email'];
                     $booking_datetime = $booking['booking_datetime'];
                     $visited = $booking['visited'];
+                    $eventDate = $booking['eventDate'];
         
                     // Insert the booking into wp_event_booking_saves table
                     $wpdb->insert($table_event_booking_saves, array(
@@ -140,6 +142,7 @@
                         'email' => $email,
                         'booking_datetime' => $booking_datetime,
                         'visited' => $visited,
+                        'eventDate' => $eventDate,
                         'booking_delete_datetime' => current_time('mysql')
                     ));
                 }

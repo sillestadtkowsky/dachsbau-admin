@@ -343,6 +343,37 @@ function so_schedule_booking_page() {
 }
 
 
+function my_screen_options_show_screen_filter() {
+    $current_screen = get_current_screen();
+    if ( $current_screen->id === 'dachsbau-admin_page_so_schedule-booking' ) {
+        echo '<div id="screen-options-wrap" class="" tabindex="-1" aria-label="Tab „Ansicht anpassen“" style="display: block;">
+        <form id="adv-settings" method="post">
+                <fieldset class="metabox-prefs">
+                <legend>Spalten</legend>
+                    <label><input class="hide-column-tog" name="buchungszeit-hide" type="checkbox" id="buchungszeit-hide" value="author" checked="checked">Autor</label>
+                    <label><input class="hide-column-tog" name="loeschstatus-hide" type="checkbox" id="loeschstatus-hide" value="categories" checked="checked">Kategorien</label>
+                    <label><input class="hide-column-tog" name="kursende-hide" type="checkbox" id="kursende-hide" value="tags" checked="checked">Schlagwörter</label>
+                </fieldset>
+                <fieldset class="screen-options">
+                    <legend>Seitennummerierung</legend>
+                        <label for="edit_post_per_page">Einträge pro Seite:</label>
+                        <input type="number" step="1" min="1" max="999" class="screen-per-page" name="wp_screen_options[value]" id="edit_post_per_page" maxlength="3" value="20">
+                        <input type="hidden" name="wp_screen_options[option]" value="edit_post_per_page">
+                </fieldset>
+                <p class="submit"><input type="submit" name="screen-options-apply" id="screen-options-apply" class="button button-primary" value="Übernehmen"></p>
+        </form>
+        </div>';
+        return true;
+    }
+    return true;
+}
+//add_filter('screen_options_show_screen', 'my_screen_options_show_screen_filter');
+
+
+
+
+
+
 function so_member_checker_file_upload() {
     if(isset($_POST["submit"])) {
         global $wpdb;
