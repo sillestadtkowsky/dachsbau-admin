@@ -11,7 +11,7 @@
                     bs.mitgliedsnummer as Mitgliedsnummer,
                     bs.name as Mitgliedsname,
                     bs.email as Mail,
-                    bs.eventDate as Kursdatum
+                    DATE_FORMAT(bs.eventDate,'%d.%m.%Y') AS  Kursdatum,
                     DATE_FORMAT(bs.booking_delete_datetime,'%d.%m.%Y - %H:%i') AS Loeschdatum,
                     bs.visited
                   FROM {$wpdb->prefix}event_booking_saves AS bs
@@ -26,8 +26,7 @@
         function so_removeOldBookings(){
             $output = 'Zu löschende Buchungen: <br> ';
     
-            $args = array('interval_minutes' => 30);
-            $upcoming_events = self::so_getUpcomingEvents($args);
+            $upcoming_events = self::so_getUpcomingEvents();
     
             if (!empty($upcoming_events)) {
                 foreach ($upcoming_events as $event) {
@@ -41,21 +40,19 @@
             return $output;
         }
     
-        function so_getUpcomingEvents($args) {
-            $bookings_to_delete = self::so_getBookingsToDelete($args);
+        function so_getUpcomingEvents() {
+            $bookings_to_delete = self::so_getBookingsToDelete();
             self::so_saveBookingsToTable($bookings_to_delete);
             self::so_deleteBookings($bookings_to_delete);
             return $bookings_to_delete;
         }
         
-        function so_getBookingsToDelete($args) {
+        function so_getBookingsToDelete() {
             
             date_default_timezone_set('Europe/Berlin');
             global $wpdb;
         
             // Get the interval and table names
-            $interval_minutes = isset($args['interval_minutes']) ? $args['interval_minutes'] : 15;
-            $interval = $interval_minutes . ' MINUTE';
             $table_event_hours = $wpdb->prefix . 'event_hours';
             $table_event_hours_booking = $wpdb->prefix . 'event_hours_booking';
         
@@ -71,7 +68,6 @@
                       JOIN {$wpdb->posts} AS p ON t.weekday_id = p.ID
                       JOIN {$table_event_hours_booking} AS b ON t.event_hours_id = b.event_hours_id
                       WHERE SUBSTR(p.post_name, 1, 2) = '$weekday_string'";
-                      /*WHERE CONCAT('1970-01-01 ', TIME(t.start)) < DATE_SUB(CONCAT('1970-01-01 ', '$now'), INTERVAL $interval) AND SUBSTR(p.post_name, 1, 2) = '$weekday_string'";*/
                       
 
             $bookings = $wpdb->get_results($query, ARRAY_A);

@@ -30,7 +30,8 @@ function so_DachsbauKarowAdminMenu()
     //Add sub-menu pages
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
-    add_submenu_page('so_dachsbau-karow-admin-menu','Gelöscht Buchungen','Gelöscht Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
+    //add_submenu_page('so_dachsbau-karow-admin-menu','Buchungen','Buchungen','manage_options','so_current_booking','so_current_booking_page');
+    add_submenu_page('so_dachsbau-karow-admin-menu','Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu','Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
@@ -71,8 +72,8 @@ function so_dachsbau_admin_info_page() {
                 <p>Hier können alte Buchungen, welche noch nicht mit der automatik gelöscht wurden, exportiert werden.</p>
             </a>
             <a href="<?php echo admin_url('admin.php?page=so_schedule-booking'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                 <h3>Gelöschte Buchungen</h3>
-                <p>Verwalte hier automatisch gelöschte Buchungen.</p>
+                 <h3>Gesicherte Buchungen</h3>
+                <p>Verwalte hier automatisch gesicherte Buchungen.</p>
             </a>           
             <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Konfiguration</h3>
@@ -329,9 +330,9 @@ function so_schedule_booking_page() {
     $booking_list_table->prepare_items();
     ?>
     <div class="wrap">
-        <h2>Gelöscht Buchungen verwalten</h2>
+        <h2>Gesicherte Buchungen verwalten</h2>
         <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
-        <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung löschen. :)</p>
+        <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
         <form method="post">
          <input type="hidden" name="page" value="wp_list_table_class" />
         <h3>Vergangene Buchungen </h3>
@@ -341,6 +342,23 @@ function so_schedule_booking_page() {
     <?php
 }
 
+function so_current_booking_page() {
+    require_once('class/so-kurs-scheduler/booking-current-admin-table-class.php');
+    $booking_list_table = new SO_CurrentBookingTable();
+    $booking_list_table->prepare_items();
+    ?>
+    <div class="wrap">
+        <h2>Gesicherte Buchungen verwalten</h2>
+        <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
+        <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
+        <form method="post">
+         <input type="hidden" name="page" value="wp_list_table_class" />
+        <h3>Vergangene Buchungen </h3>
+        <?php $booking_list_table->display(); ?>
+        </form>
+    </div>
+    <?php
+}
 
 function my_screen_options_show_screen_filter() {
     $current_screen = get_current_screen();
