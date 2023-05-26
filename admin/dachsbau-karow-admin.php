@@ -215,30 +215,35 @@ function so_dachsbau_admin_config() {
                         <p style="margin-top: 0;">Wähle die Kursnamen aus, welche feste Kurse sind und <u>keine</u> Buchungsmöglichkeit besitzen sollen.</p>
                     </div>
                     <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
-                        <?php
-                            echo '<select name="so_kurs_names[]" id="so_kurs_names" multiple style="display: inline-block; width: 400px;">';
-                            
-                            $postTypSlug = so_dachsbau_post_type_settings();
-                            $events = new WP_Query( array(
-                                'post_type' => $postTypSlug["slug"],
-                                'orderby' => 'title',
-                                'order' => 'ASC'
-                            ) );
-                            while ($events->have_posts()) {
-                                $events->the_post();
-                                $event_title = get_the_title();
-                                $event_name = get_post_field( 'post_name', $events->ID );
-                                $selected = '';
-                                if (isset($_POST['so_kurs_names']) && in_array($event_name, $_POST['so_kurs_names'])) {
-                                    $selected = 'selected';
-                                } elseif (!empty($so_kurs_names) && in_array($event_name, $so_kurs_names)) {
-                                    $selected = 'selected';
-                                }
-                                echo '<option value="' . $event_name . '" ' . $selected . '>' . $event_title . '</option>';
+                    <?php
+               
+                        echo '<select name="so_kurs_names[]" id="so_kurs_names" multiple style="display: inline-block; width: 400px; height: 20em;">';
+
+                        $postTypSlug = so_dachsbau_post_type_settings();
+                        $posts = get_posts( array(
+                            'post_type' => $postTypSlug["slug"],
+                            'orderby' => 'title',
+                            'order' => 'ASC',
+                            'posts_per_page' => -1 // Alle Posts abrufen, nicht paginieren
+                        ) );
+
+                        foreach ( $posts as $post ) {
+                            setup_postdata( $post );
+                            $event_title = $post->post_title;// Den Titel des Posts abrufen
+                            $event_name = $post->post_name; // Den post_name des Posts abrufen
+                            $selected = '';
+                            if ( isset( $_POST['so_kurs_names'] ) && in_array( $event_name, $_POST['so_kurs_names'] ) ) {
+                                $selected = 'selected';
+                            } elseif ( ! empty( $so_kurs_names ) && in_array( $event_name, $so_kurs_names ) ) {
+                                $selected = 'selected';
                             }
-                            wp_reset_postdata();
-                            echo '</select>';
-                        ?>
+                            echo '<option value="' . $event_name . '" ' . $selected . '>' . $event_title . '</option>';
+                        }
+
+                        wp_reset_postdata();
+                        echo '</select>';
+                    ?>
+
                     </div>
                 </div>
                 <div style="display: flex; align-items: flex-start;">
