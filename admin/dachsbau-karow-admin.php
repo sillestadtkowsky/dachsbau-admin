@@ -5,6 +5,7 @@ Plugin Name: Mein Plugin
 */
 
 require_once( plugin_dir_path( __FILE__ ) . 'class/so-dachsbau-dashboard-class.php' );
+
 new So_Dachsbau_Dashboard_Widget();
 
 // update DB
@@ -83,6 +84,25 @@ function so_dachsbau_admin_info_page() {
     </div>
     <?php
 }
+
+
+
+    function so_coach_table_shortcode( $atts ) {
+        ob_start();
+         include_once( plugin_dir_path( __FILE__ ) . '../class/coach.table.class.php' );
+        $template = ob_get_contents();
+        ob_end_clean();
+        return $template;
+    }
+    
+    add_action( 'wp_enqueue_scripts', 'so_coach_queue_stylesheet' );
+    
+    function so_coach_queue_stylesheet() {
+        wp_enqueue_style( 'so-table-shortcode-style', admin_url( 'css/wp-admin.css' ), array(), '1.0' );
+    }
+
+add_shortcode('so_coach_table', 'so_coach_table_shortcode');
+
 
 
 function so_dachsbau_post_type_settings()

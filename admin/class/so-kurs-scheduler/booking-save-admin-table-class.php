@@ -173,7 +173,7 @@ class SO_EventBookingTable extends WP_List_Table
         $current_screen->render_per_page_options();
         
         // Hole die Werte für Spalten und Zeilen aus der URL
-        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 20;
+        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
         $hidden_columns = get_hidden_columns( 'wp-list-table' );
  
         // Weitere Tabellenvorbereitungen hier
@@ -238,7 +238,6 @@ class SO_EventBookingTable extends WP_List_Table
     public function get_sortable_columns()
     {
         $sortable_columns = array(
-            'Id' => array('Id', true),
             'Kurs' => array('Kurs', true),
             'Kursdatum' => array('Kurs', true),
             'Buchungsdatum' => array('Buchungsdatum', true),
