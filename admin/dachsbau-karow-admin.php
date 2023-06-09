@@ -5,6 +5,7 @@ Plugin Name: Mein Plugin
 */
 
 require_once( plugin_dir_path( __FILE__ ) . 'class/so-dachsbau-dashboard-class.php' );
+require_once( plugin_dir_path( __FILE__ ) . 'class/coach.table.class.php' );
 
 new So_Dachsbau_Dashboard_Widget();
 
@@ -34,6 +35,7 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_page', 'so_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
 
@@ -366,6 +368,24 @@ function so_schedule_booking_page() {
          <input type="hidden" name="page" value="wp_list_table_class" />
         <h3>Vergangene Buchungen </h3>
         <?php $booking_list_table->display(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+function so_coach_booking_page() {
+    require_once('class/so-kurs-scheduler/booking-current-admin-table-class.php');
+    $coach_booking_list_table = new SO_COACH_List_Table();
+    $coach_booking_list_table->prepare_items();
+    ?>
+    <div class="wrap">
+        <h2>Dachse Coach Bereich</h2>
+        <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
+        <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
+        <form method="post">
+         <input type="hidden" name="page" value="wp_list_table_class" />
+        <h3>Buchungen einsehen </h3>
+        <?php $coach_booking_list_table->display(); ?>
         </form>
     </div>
     <?php
