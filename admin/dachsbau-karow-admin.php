@@ -32,12 +32,13 @@ function so_DachsbauKarowAdminMenu()
     //Add sub-menu pages
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_page', 'so_booking_page');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
+
 
 function so_dachsbau_admin_info_page() {
     ?>
@@ -351,7 +352,12 @@ function so_dachsbau_admin_config() {
     <?php
 }
 
-function so_booking_page() {
+function so_booking_page(){
+    $instance = SP_Bookings::get_instance();
+    $instance->screen_option();
+}
+
+function so_booking_export_page() {
     SP_Bookings::bookings_export_page();
 }
 
@@ -434,11 +440,6 @@ function my_screen_options_show_screen_filter() {
     return true;
 }
 //add_filter('screen_options_show_screen', 'my_screen_options_show_screen_filter');
-
-
-
-
-
 
 function so_member_checker_file_upload() {
     if(isset($_POST["submit"])) {
