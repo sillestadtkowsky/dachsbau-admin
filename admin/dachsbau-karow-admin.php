@@ -32,6 +32,7 @@ function so_DachsbauKarowAdminMenu()
     //Add sub-menu pages
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste bearbeiten', 'Mitgliederliste bearbeiten', 'manage_options', 'so_member-checker-import', 'so_mitgliederliste');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Mitgliederliste importieren', 'Mitgliederliste importieren', 'manage_options', 'so_member_checker_file_upload', 'so_member_checker_file_upload');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Aktuelle Buchungen','Aktuelle Buchungen','manage_options','timetable_admin_bookings','timetable_admin_bookings');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
@@ -70,8 +71,12 @@ function so_dachsbau_admin_info_page() {
             <a href="<?php echo admin_url('admin.php?page=so_member_checker_file_upload'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Mitgliederliste importieren</h3>
                 <p>Lade hier eine aktuelle neue Mitgliederliste hoch.</p>
-            </a>            
-            <a href="<?php echo admin_url('admin.php?page=so_booking_page'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+            </a>         
+            <a href="<?php echo admin_url('admin.php?page=timetable_admin_bookings'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+                <h3>Aktuelle Buchungen sehen</h3>
+                <p>Überblick über aktuell gebuchte Kurse</p>
+            </a>   
+            <a href="<?php echo admin_url('admin.php?page=so_booking_export_page'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Aktuelle Buchungen exportieren</h3>
                 <p>Hier können alte Buchungen, welche noch nicht mit der automatik gelöscht wurden, exportiert werden.</p>
             </a>
@@ -82,6 +87,10 @@ function so_dachsbau_admin_info_page() {
             <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Konfiguration</h3>
                 <p>Nehme hier optionale Einstellungen vor </p>
+            </a>
+            <a href="<?php echo admin_url('admin.php?page=so_coach_booking_page'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+                <h3>Trainer Übersicht</h3>
+                <p>Hier wird den Trainer ermöglicht, für den aktuell stattfindenden Kurs die Mitglieder als "Anwesende" zu markieren. </p>
             </a>
         </div>
     </div>
@@ -386,11 +395,10 @@ function so_coach_booking_page() {
     ?>
     <div class="wrap">
         <h2>Dachse Coach Bereich</h2>
-        <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
-        <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
+        <p>Hier wird den Trainer ermöglicht, für den aktuell stattfindenden Kurs die Mitglieder als "Anwesende" oder "Abwesend" zu markieren.</p>
         <form method="post">
          <input type="hidden" name="page" value="wp_list_table_class" />
-        <h3>Buchungen einsehen </h3>
+        <h3>Teilnahmeliste </h3>
         <?php $coach_booking_list_table->display(); ?>
         </form>
     </div>

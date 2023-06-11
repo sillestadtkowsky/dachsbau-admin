@@ -20,10 +20,10 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_columns() {
         return array(
             'visited'=>'Status',
+            'event_title' => 'Kursname',
             'guest_message' => 'Mitgliedsnummer',
             'user_name' => 'Name',
             'user_email' => 'Email',
-            'event_title' => 'Kursname',
             'eventDate'=>'Kurstag',          
             'start' => 'Kursbeginn'
         );
@@ -73,21 +73,34 @@ class SO_COACH_List_Table extends WP_List_Table {
         return TT_DB::getBookings($do_search);
     }
 
-    function updateStatus() {
-        // Führen Sie hier den Code aus, um den Status des Datensatzes mit der angegebenen ID zu aktualisieren
-        // Verwenden Sie beispielsweise eine AJAX-Anfrage, um die Aktualisierung an den Server zu senden
-        // Nach der Aktualisierung können Sie die Tabelle aktualisieren, um den neuen Status anzuzeigen
-    }
-
     function column_default( $item, $column_name ) {
         switch ( $column_name ) {
             // Andere Spalten hier
-            
+            case 'guest_message':
+                $userId = (int) $item['user_id'];
+                if($userId == 1){
+                    return 'intern';
+                }else{
+                    return $item['guest_message'];
+                }
+            case 'user_name':
+                $userId = (int) $item['user_id'];
+                if($userId == 1){
+                    return $item['user_name'];
+                }else{
+                    return $item['guest_name'];
+                }
+            case 'user_email':
+                $userId = (int) $item['user_id'];
+                if($userId == 1){
+                    return $item['user_email'];
+                }else{
+                    return $item['guest_email'];
+                }
             case 'visited':
                 $status = (int) $item['visited'];
                 $id = (int) $item['booking_id'];
                 
-                $status_text = ( $status === 0 ) ? 'Abwesend' : 'Anwesend';
                 $status_back_color = ( $status === 0 ) ? '#ff2600' : '#07b38a';
     
                 $output = '<form method="post">
