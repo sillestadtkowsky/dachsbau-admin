@@ -395,10 +395,10 @@ function so_coach_booking_page() {
     ?>
     <div class="wrap">
         <h2>Dachse Coach Bereich</h2>
-        <p>Hier wird den Trainer ermöglicht, für den aktuell stattfindenden Kurs die Mitglieder als "Anwesende" oder "Abwesend" zu markieren.</p>
+        <p>Hier wird den Trainern ermöglicht, für die an diesem Tag stattfindenden Kurs die Mitglieder als "Anwesend" oder "Abwesend" zu markieren.</p>
         <form method="post">
          <input type="hidden" name="page" value="wp_list_table_class" />
-        <h3>Teilnahmeliste </h3>
+        <h3>Übersicht </h3>
         <?php $coach_booking_list_table->display(); ?>
         </form>
     </div>

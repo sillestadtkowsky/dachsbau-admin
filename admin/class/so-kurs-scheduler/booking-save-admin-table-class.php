@@ -113,16 +113,6 @@ class SO_EventBookingTable extends WP_List_Table
     {
         
         global $wpdb;
-        $searchcol = array(
-          'Kurs',
-          'Kursdatum',
-          'Buchungsdatum',
-          'Kursbeginn',
-          'Mitgliedsname',
-          'Mitgliedsnummer',
-          'Status',
-          'Mail'
-        );
 
         $do_search = '';
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
@@ -174,10 +164,6 @@ class SO_EventBookingTable extends WP_List_Table
         
         // Hole die Werte für Spalten und Zeilen aus der URL
         $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
-        $hidden_columns = get_hidden_columns( 'wp-list-table' );
- 
-        // Weitere Tabellenvorbereitungen hier
-        // ...
  
         // Rufe die Daten ab und setze sie in die Tabelle ein
         $this->items = $this->get_table_data();

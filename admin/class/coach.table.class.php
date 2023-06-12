@@ -30,12 +30,20 @@ class SO_COACH_List_Table extends WP_List_Table {
     }
 
     // Holen Sie sich die Daten aus der Datenbank
-    function prepare_items() {
+    function prepare_items($search ='') {
 
+        $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
+        $select_visited_filter = isset($_POST['select-Visited-filter']) ? $_POST['select-Visited-filter'] : '';
+        $select_kurs_filter = isset($_POST['select-kurs-filter']) ? $_POST['select-kurs-filter'] : '';
+        $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
+        $status = isset($_POST['status']) ? $_POST['status'] : '';
+    
+
+        /*
+        &&  !isset( $_POST['select-Visited-filter'] )  &&  !isset( $_POST['select-kurs-filter'] 
+        */
         // Überprüfen, ob das Formular gesendet wurde
-        if ( isset( $_POST['booking_id'] ) && isset( $_POST['status'] ) ) {
-            $booking_id = $_POST['booking_id'];
-            $status = $_POST['status'];
+        if ( (!empty($booking_Id) && isset($status)) && ( empty($select_kurs_filter) && empty($select_visited_filter))) {
             
             // Führen Sie hier den Code aus, um den Status des Datensatzes mit der angegebenen ID zu aktualisieren
             // Verwenden Sie beispielsweise eine Datenbankabfrage, um den Status zu aktualisieren
@@ -46,7 +54,7 @@ class SO_COACH_List_Table extends WP_List_Table {
             $wpdb->update(
                 $table_name,
                 array( 'visited' => $status ),
-                array( 'booking_id' => $booking_id ),
+                array( 'booking_id' => $booking_Id),
                 array( '%d' ),
                 array( '%d' )
             );
@@ -56,8 +64,30 @@ class SO_COACH_List_Table extends WP_List_Table {
             exit;
         }
 
-        $do_search = '';
+        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
+
+        if (!empty($select_visited_filter)) {
+            if($select_visited_filter==="gefehlt"){
+                $do_search['visited'] = 0;
+            }
+            if($select_visited_filter==="teilgenommen"){
+                $do_search['visited'] = 1;
+            }
+        }
+
+        if (!empty($select_kurs_filter)) {
+                $do_search['booking_id'] = $select_kurs_filter;
+        }
+
         $data = $this->get_data_from_database($do_search);
+        $total_items = count($data);
+
+        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
+
+        $this->set_pagination_args(array(
+            'total_items' => $total_items,
+            'per_page' => $per_page
+        ));
 
         $columns = $this->get_columns();
         $hidden = array();
@@ -72,6 +102,80 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_data_from_database($do_search) {
         return TT_DB::getBookings($do_search);
     }
+
+    public function extra_tablenav($which) {
+        if ($which == 'top') {
+            $output = '<div class="alignleft actions">';
+            $output .= self::soFilterSaveBookings();
+            $output .= self::soFilterEventVisited();
+            $output .= '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
+            $output .= '</div>';
+            echo $output;
+        }
+    }
+
+    public function soFilterEventVisited() {
+        $output = '';
+        $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
+        $output .= '<option value="alle">Alle Status</option>';
+        $output .= '<option value="gefehlt">gefehlt</option>';
+        $output .= '<option value="teilgenommen">teilgenommen</option>';
+        $output .= '</select>';
+        return $output;
+    }
+
+    public function soFilterSaveBookings() {
+        $output = '';
+        $args = [];
+        $args = array('weekday' => MC_UTILS::so_getWeekday());
+        $bookings = self::get_data_from_database($args);
+    
+        // Erstelle das $options Array aus der Datenbank-Abfrage
+        $options = array();
+        foreach ($bookings as $booking) {
+            $key = $booking['booking_id'];
+            if (!isset($options[$key])) {
+                $options[$key] = array(
+                    'id' => $booking['booking_id'],
+                    'event_id' => $booking['event_id'],
+                    'Kurs' => $booking['event_title'],
+                    'post_title' => $booking['weekday'],
+                    'Kursbeginn' => $booking['start'],
+                );
+            }
+        }
+    
+        // Sortiere das Array nach event_title, post_title und Kursbeginn
+        usort($options, function($a, $b) {
+            $cmp1 = strnatcasecmp($a['Kurs'], $b['Kurs']);
+            if ($cmp1 !== 0) {
+                return $cmp1;
+            }
+            $cmp2 = strcmp($a['post_title'], $b['post_title']);
+            if ($cmp2 !== 0) {
+                return $cmp2;
+            }
+            $cmp3 = strcmp($a['Kursbeginn'], $b['Kursbeginn']);
+            return $cmp3;
+        });
+    
+        $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
+        $output .= '<option value="0">Alle Kurse</option>';
+    
+        foreach ($options as $option) {
+            $selected = '';
+            if (isset($_GET['select-kurs-filter'])) {
+                $selected = ($_GET['select-kurs-filter'] == $option['id']) ? 'selected="selected"' : '';
+            }
+            $output .= '<option value="' . esc_html($option['id']) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
+        }
+    
+        $output .= '</select>';
+        return $output;
+    }
+    
 
     function column_default( $item, $column_name ) {
         switch ( $column_name ) {
@@ -104,7 +208,7 @@ class SO_COACH_List_Table extends WP_List_Table {
                 $status_back_color = ( $status === 0 ) ? '#ff2600' : '#07b38a';
     
                 $output = '<form method="post">
-                                <input type="hidden" name="booking_id" value="' . $id . '">
+                                <input type="hidden" name="id" value="' . $id . '">
                                 <select name="status" onchange="this.form.submit();" style="color:white; background-color: ' . $status_back_color . '">
                                     <option value="0" ' . ( $status === 0 ? 'selected' : '' ) . '>Abwesend</option>
                                     <option value="1" ' . ( $status === 1 ? 'selected' : '' ) . '>Anwesend</option>

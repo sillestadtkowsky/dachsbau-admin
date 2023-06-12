@@ -46,6 +46,13 @@ class MC_UTILS
 		}
 	}
 
+	public static function so_getWeekday() {
+		$timezone = new DateTimeZone('Europe/Berlin'); // Hier die Zeitzone anpassen
+		$weekday = (new DateTime('now', $timezone))->format('N') - 1;
+		$weekdays = array('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So');
+		return $weekdays[$weekday];
+	}
+
 	public static function getNow()
 	{
 		$now = new DateTime();
