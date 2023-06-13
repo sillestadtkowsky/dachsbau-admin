@@ -76,7 +76,7 @@ class SO_COACH_List_Table extends WP_List_Table {
         }
 
         if (!empty($select_kurs_filter)) {
-                $do_search['booking_id'] = $select_kurs_filter;
+                $do_search['event_hours_id'] = $select_kurs_filter;
         }
 
         $data = $this->get_data_from_database($do_search);
@@ -138,7 +138,7 @@ class SO_COACH_List_Table extends WP_List_Table {
             if (!isset($options[$key])) {
                 $options[$key] = array(
                     'id' => $booking['booking_id'],
-                    'event_id' => $booking['event_id'],
+                    'event_id' => $booking['event_hours_id'],
                     'Kurs' => $booking['event_title'],
                     'post_title' => $booking['weekday'],
                     'Kursbeginn' => $booking['start'],
@@ -164,14 +164,23 @@ class SO_COACH_List_Table extends WP_List_Table {
         $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
         $output .= '<option value="0">Alle Kurse</option>';
     
+        $uniqueEventIDs = array(); // Array für eindeutige event_id-Werte
+
         foreach ($options as $option) {
-            $selected = '';
-            if (isset($_GET['select-kurs-filter'])) {
-                $selected = ($_GET['select-kurs-filter'] == $option['id']) ? 'selected="selected"' : '';
+            $eventID = $option['event_id'];
+            
+            // Überprüfen, ob die event_id bereits vorhanden ist
+            if (!in_array($eventID, $uniqueEventIDs)) {
+                $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
+                
+                $selected = '';
+                if (isset($_GET['select-kurs-filter'])) {
+                    $selected = ($_GET['select-kurs-filter'] == $eventID) ? 'selected="selected"' : '';
+                }
+                $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
             }
-            $output .= '<option value="' . esc_html($option['id']) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
         }
-    
+        
         $output .= '</select>';
         return $output;
     }

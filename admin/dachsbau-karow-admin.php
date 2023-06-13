@@ -9,17 +9,6 @@ require_once( plugin_dir_path( __FILE__ ) . 'class/coach.table.class.php' );
 
 new So_Dachsbau_Dashboard_Widget();
 
-// update DB
-/*
-    register_activation_hook( __FILE__, 'my_plugin_activation' );
-
-    function my_plugin_activation() {
-        global $wpdb;
-        $wpdb->query( "ALTER TABLE {$wpdb->prefix}event_hours_booking ADD visited int(6);");
-
-    }
-*/
-
 /*
 * ###############################
 * ADD Admin Menu
@@ -36,7 +25,9 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
+    if (current_user_can('dachs-trainer') || current_user_can('administrator') ) {
+        add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
+    }
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
 
