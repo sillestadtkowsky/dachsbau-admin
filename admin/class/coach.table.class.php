@@ -37,14 +37,38 @@ class SO_COACH_List_Table extends WP_List_Table {
         $select_kurs_filter = isset($_POST['select-kurs-filter']) ? $_POST['select-kurs-filter'] : '';
         $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
         $status = isset($_POST['status']) ? $_POST['status'] : '';
-    
+        
+        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
+        $do_search['eventDate'] = MC_UTILS::getNow();
+        $existing_search = get_option('so_coach_suchfilter', false);
 
-        /*
-        &&  !isset( $_POST['select-Visited-filter'] )  &&  !isset( $_POST['select-kurs-filter'] 
-        */
-        // Überprüfen, ob das Formular gesendet wurde
-        if ( (!empty($booking_Id) && isset($status)) && ( empty($select_kurs_filter) && empty($select_visited_filter))) {
+        if (isset($_POST['so_save_booking_filter_submit'])) {
+    
+            if (!empty($select_visited_filter)) {
+                if($select_visited_filter==="gefehlt"){
+                    $do_search['visited'] = 0;
+                }
+                if($select_visited_filter==="teilgenommen"){
+                    $do_search['visited'] = 1;
+                }
+            }
+    
+            if (!empty($select_kurs_filter)) {
+                    $do_search['event_hours_id'] = $select_kurs_filter;
+            }
+    
+            //if (!(empty($select_kurs_filter) && empty($select_visited_filter))) {
+                // Die Option "so_coach_suchfilter" existiert nicht oder der Wert hat sich geändert
+                update_option('so_coach_suchfilter', $do_search);
+                $existing_search = get_option('so_coach_suchfilter', false);
+            //} 
             
+            if ($existing_search === false) {
+                // Option "so_coach_suchfilter" existiert nicht, füge sie hinzu
+                add_option('so_coach_suchfilter', $do_search);
+            }
+
+        } elseif (isset($_POST['status'])) {
             // Führen Sie hier den Code aus, um den Status des Datensatzes mit der angegebenen ID zu aktualisieren
             // Verwenden Sie beispielsweise eine Datenbankabfrage, um den Status zu aktualisieren
             
@@ -64,39 +88,6 @@ class SO_COACH_List_Table extends WP_List_Table {
             exit;
         }
 
-        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
-        $do_search['eventDate'] = MC_UTILS::getNow();
-
-        if (!empty($select_visited_filter)) {
-            if($select_visited_filter==="gefehlt"){
-                $do_search['visited'] = 0;
-            }
-            if($select_visited_filter==="teilgenommen"){
-                $do_search['visited'] = 1;
-            }
-        }
-
-        if (!empty($select_kurs_filter)) {
-                $do_search['event_hours_id'] = $select_kurs_filter;
-        }
-
-        $existing_search = get_option('so_coach_suchfilter', false);
-
-        if ($existing_search === false || $existing_search !== $do_search) {
-            // Die Option "so_coach_suchfilter" existiert nicht oder der Wert hat sich geändert
-            update_option('so_coach_suchfilter', $do_search);
-            $existing_search = get_option('so_coach_suchfilter', false);
-        } else {
-            // Die Option "so_coach_suchfilter" existiert und der Wert hat sich nicht geändert
-            echo "Die Suche hat sich nicht geändert.";
-        }
-        
-        if ($existing_search === false) {
-            // Option "so_coach_suchfilter" existiert nicht, füge sie hinzu
-            add_option('so_coach_suchfilter', $do_search);
-        }
-
-       
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
 
@@ -134,7 +125,7 @@ class SO_COACH_List_Table extends WP_List_Table {
 
     public function soFilterSaveBookings() {
         $output = '';
-        $selectedKursFilter = isset($_GET['select-kurs-filter']) ? $_GET['select-kurs-filter'] : '';
+        $selectedKursFilter = get_option('so_coach_suchfilter', false);
         $args = [];
         $args = array('weekday' => MC_UTILS::so_getWeekday());
         $bookings = self::get_data_from_database($args);
@@ -182,8 +173,10 @@ class SO_COACH_List_Table extends WP_List_Table {
                 $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
 
                 $selected = '';
-                if ($selectedKursFilter == $eventID) {
-                    $selected = 'selected="selected"';
+                if(isset($selectedKursFilter['event_hours_id'])){
+                    if ($selectedKursFilter['event_hours_id'] == $eventID) {
+                        $selected = 'selected="selected"';
+                    }
                 }
                 $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
             }
@@ -194,12 +187,32 @@ class SO_COACH_List_Table extends WP_List_Table {
     }
 
     public function soFilterEventVisited() {
+        $selectedStatus = get_option('so_coach_suchfilter', false);
+
+
         $output = '';
         $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
         $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
         $output .= '<option value="">Alle Status</option>';
-        $output .= '<option value="gefehlt">gefehlt</option>';
-        $output .= '<option value="teilgenommen">teilgenommen</option>';
+        
+        $selected = '';
+        if(isset($selectedStatus['visited'])){
+            if((int) $selectedStatus['visited']==0){
+                $selected = 'selected="selected"';
+                $output .= '<option value="gefehlt" '. $selected . '>gefehlt</option>';
+                $output .= '<option value="teilgenommen">teilgenommen</option>';
+            }
+            if((int) $selectedStatus['visited']==1){
+                $selected = 'selected="selected"';
+                $output .= '<option value="gefehlt">gefehlt</option>';
+                $output .= '<option value="teilgenommen" '. $selected . '>teilgenommen</option>';
+            }
+        }else{
+            $output .= '<option value="gefehlt">gefehlt</option>';
+            $output .= '<option value="teilgenommen">teilgenommen</option>';
+        }
+
+
         $output .= '</select>';
         return $output;
     }    
