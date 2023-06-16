@@ -65,6 +65,7 @@ class SO_COACH_List_Table extends WP_List_Table {
         }
 
         $do_search = array('weekday' => MC_UTILS::so_getWeekday());
+        $do_search['eventDate'] = MC_UTILS::getNow();
 
         if (!empty($select_visited_filter)) {
             if($select_visited_filter==="gefehlt"){
@@ -79,7 +80,24 @@ class SO_COACH_List_Table extends WP_List_Table {
                 $do_search['event_hours_id'] = $select_kurs_filter;
         }
 
-        $data = $this->get_data_from_database($do_search);
+        $existing_search = get_option('so_coach_suchfilter', false);
+
+        if ($existing_search === false || $existing_search !== $do_search) {
+            // Die Option "so_coach_suchfilter" existiert nicht oder der Wert hat sich geändert
+            update_option('so_coach_suchfilter', $do_search);
+            $existing_search = get_option('so_coach_suchfilter', false);
+        } else {
+            // Die Option "so_coach_suchfilter" existiert und der Wert hat sich nicht geändert
+            echo "Die Suche hat sich nicht geändert.";
+        }
+        
+        if ($existing_search === false) {
+            // Option "so_coach_suchfilter" existiert nicht, füge sie hinzu
+            add_option('so_coach_suchfilter', $do_search);
+        }
+
+       
+        $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
 
         $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
@@ -115,93 +133,76 @@ class SO_COACH_List_Table extends WP_List_Table {
     }
 
     public function soFilterSaveBookings() {
-    $output = '';
-    $selectedKursFilter = isset($_GET['select-kurs-filter']) ? $_GET['select-kurs-filter'] : '';
-    $args = [];
-    $args = array('weekday' => MC_UTILS::so_getWeekday());
-    $bookings = self::get_data_from_database($args);
+        $output = '';
+        $selectedKursFilter = isset($_GET['select-kurs-filter']) ? $_GET['select-kurs-filter'] : '';
+        $args = [];
+        $args = array('weekday' => MC_UTILS::so_getWeekday());
+        $bookings = self::get_data_from_database($args);
 
-    // Erstelle das $options Array aus der Datenbank-Abfrage
-    $options = array();
-    foreach ($bookings as $booking) {
-        $key = $booking['booking_id'];
-        if (!isset($options[$key])) {
-            $options[$key] = array(
-                'id' => $booking['booking_id'],
-                'event_id' => $booking['event_hours_id'],
-                'Kurs' => $booking['event_title'],
-                'post_title' => $booking['weekday'],
-                'Kursbeginn' => $booking['start'],
-            );
-        }
-    }
-
-    // Sortiere das Array nach event_title, post_title und Kursbeginn
-    usort($options, function($a, $b) {
-        $cmp1 = strnatcasecmp($a['Kurs'], $b['Kurs']);
-        if ($cmp1 !== 0) {
-            return $cmp1;
-        }
-        $cmp2 = strcmp($a['post_title'], $b['post_title']);
-        if ($cmp2 !== 0) {
-            return $cmp2;
-        }
-        $cmp3 = strcmp($a['Kursbeginn'], $b['Kursbeginn']);
-        return $cmp3;
-    });
-
-    $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
-    $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
-    $output .= '<option value="0">Alle Kurse</option>';
-
-    $uniqueEventIDs = array(); // Array für eindeutige event_id-Werte
-
-    foreach ($options as $option) {
-        $eventID = $option['event_id'];
-
-        // Überprüfen, ob die event_id bereits vorhanden ist
-        if (!in_array($eventID, $uniqueEventIDs)) {
-            $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
-
-            $selected = '';
-            if ($selectedKursFilter == $eventID) {
-                $selected = 'selected="selected"';
+        // Erstelle das $options Array aus der Datenbank-Abfrage
+        $options = array();
+        foreach ($bookings as $booking) {
+            $key = $booking['booking_id'];
+            if (!isset($options[$key])) {
+                $options[$key] = array(
+                    'id' => $booking['booking_id'],
+                    'event_id' => $booking['event_hours_id'],
+                    'Kurs' => $booking['event_title'],
+                    'post_title' => $booking['weekday'],
+                    'Kursbeginn' => $booking['start'],
+                );
             }
-            $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
         }
+
+        // Sortiere das Array nach event_title, post_title und Kursbeginn
+        usort($options, function($a, $b) {
+            $cmp1 = strnatcasecmp($a['Kurs'], $b['Kurs']);
+            if ($cmp1 !== 0) {
+                return $cmp1;
+            }
+            $cmp2 = strcmp($a['post_title'], $b['post_title']);
+            if ($cmp2 !== 0) {
+                return $cmp2;
+            }
+            $cmp3 = strcmp($a['Kursbeginn'], $b['Kursbeginn']);
+            return $cmp3;
+        });
+
+        $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-kurs-filter" id="select-kurs-filter">';
+        $output .= '<option value="0">Alle Kurse</option>';
+
+        $uniqueEventIDs = array(); // Array für eindeutige event_id-Werte
+
+        foreach ($options as $option) {
+            $eventID = $option['event_id'];
+
+            // Überprüfen, ob die event_id bereits vorhanden ist
+            if (!in_array($eventID, $uniqueEventIDs)) {
+                $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
+
+                $selected = '';
+                if ($selectedKursFilter == $eventID) {
+                    $selected = 'selected="selected"';
+                }
+                $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
+            }
+        }
+
+        $output .= '</select>';
+        return $output;
     }
 
-    $output .= '</select>';
-    return $output;
-}
-
-public function soFilterEventVisited() {
-    $output = '';
-    $selectedVisitedFilter = isset($_GET['select-Visited-filter']) ? $_GET['select-Visited-filter'] : '';
-    $currentURL = $_SERVER['REQUEST_URI'];
-    $queryPos = strpos($currentURL, '?');
-    $baseURL = $queryPos !== false ? substr($currentURL, 0, $queryPos) : $currentURL;
-    $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
-    $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
-    $output .= '<option value="">Alle Status</option>';
-    $output .= '<option value="gefehlt" ' . selected('gefehlt', $selectedVisitedFilter, false) . '>gefehlt</option>';
-    $output .= '<option value="teilgenommen" ' . selected('teilgenommen', $selectedVisitedFilter, false) . '>teilgenommen</option>';
-    $output .= '</select>';
-    $output .= '<input type="hidden" name="so_save_booking_filter_submit" value="1" />';
-    $output .= '<input type="hidden" name="select-kurs-filter" value="' . esc_attr($selectedVisitedFilter) . '" />';
-    $output .= '<input type="hidden" name="paged" value="1" />';
-    $output .= '<input type="hidden" name="orderby" value="' . esc_attr($this->orderby) . '" />';
-    $output .= '<input type="hidden" name="order" value="' . esc_attr($this->order) . '" />';
-    $output .= '<input type="hidden" name="per_page" value="' . esc_attr($this->per_page) . '" />';
-    $output .= '<input type="hidden" name="total_items" value="' . esc_attr($this->total_items) . '" />';
-    $output .= '<input type="hidden" name="action" value="' . esc_attr($this->current_action()) . '" />';
-    $output .= '<input type="hidden" name="so_save_booking_filter_nonce" value="' . wp_create_nonce('so-save-booking-filter') . '" />';
-    $output .= '<input type="hidden" name="paged" value="' . esc_attr($this->get_pagenum()) . '" />';
-    $output .= '<input type="hidden" name="current_view" value="' . esc_attr($this->current_view) . '" />';
-    $output .= '<input type="hidden" name="base_url" value="' . esc_attr($baseURL) . '" />';
-    return $output;
-}
-
+    public function soFilterEventVisited() {
+        $output = '';
+        $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
+        $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
+        $output .= '<option value="">Alle Status</option>';
+        $output .= '<option value="gefehlt">gefehlt</option>';
+        $output .= '<option value="teilgenommen">teilgenommen</option>';
+        $output .= '</select>';
+        return $output;
+    }    
 
     function column_default( $item, $column_name ) {
         switch ( $column_name ) {
@@ -240,7 +241,6 @@ public function soFilterEventVisited() {
                                     <option value="1" ' . ( $status === 1 ? 'selected' : '' ) . '>Anwesend</option>
                                 </select>
                             </form>';
-    
                 return $output;
                 
             default:
