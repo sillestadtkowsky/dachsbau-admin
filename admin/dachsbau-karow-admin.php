@@ -29,11 +29,10 @@ function so_DachsbauKarowAdminMenu()
 
     if (current_user_can('trainer-dachs')) {
         add_menu_page(
-            'Coach Bereich',
-            'Coach Bereich',
+            'Coach Übersicht',
+            'Coach Übersicht',
             'trainer-dachs',
             'so_dachsbau-karow-coach-menu',
-            'so_coach_booking_page',
             'so_coach_booking_page',
             'dashicons-awards', // Hier wird das Icon definiert
             10
