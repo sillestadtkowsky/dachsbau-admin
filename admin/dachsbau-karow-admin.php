@@ -25,8 +25,19 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
-    if (current_user_can('dachs-trainer') || current_user_can('administrator') ) {
-        add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
+
+    if (current_user_can('trainer-dachs')) {
+        add_menu_page(
+            'Coach Bereich',
+            'Coach Bereich',
+            'trainer-dachs',
+            'so_dachsbau-karow-coach-menu',
+            'so_coach_booking_page',
+            'so_coach_booking_page',
+            'dashicons-awards', // Hier wird das Icon definiert
+            10
+        );
     }
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');

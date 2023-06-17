@@ -16,11 +16,6 @@ class So_Dachsbau_Dashboard_Widget {
         $output = '';
         $output .= $this->so_dachsbau_dashboard_heutigeKurse();
         $output .= '<hr>';
-        $output .= $this->so_dachsbau_dashboard_neuigkeiten();
-        /* $output .= '<hr>';
-            $output .= $this->so_dachsbau_dashboard_aktuelleBuchungen();
-        */
-        $output .= '<hr>';
         $output .= $this->so_dachsbau_dashboard_footer();
         echo $output;
     }

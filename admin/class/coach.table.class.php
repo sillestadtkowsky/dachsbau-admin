@@ -38,9 +38,11 @@ class SO_COACH_List_Table extends WP_List_Table {
         $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
         $status = isset($_POST['status']) ? $_POST['status'] : '';
         
-        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
-        $do_search['eventDate'] = MC_UTILS::getNow();
         $existing_search = get_option('so_coach_suchfilter', false);
+        $existing_search['eventDate'] = MC_UTILS::getNow();
+        update_option('so_coach_suchfilter', $existing_search );
+        
+        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
 
         if (isset($_POST['so_save_booking_filter_submit'])) {
     
