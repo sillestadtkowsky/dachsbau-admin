@@ -38,39 +38,25 @@ class SO_COACH_List_Table extends WP_List_Table {
         $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
         $status = isset($_POST['status']) ? $_POST['status'] : '';
         
-        $existing_search = get_option('so_coach_suchfilter', false);
         $existing_search['eventDate'] = MC_UTILS::getNow();
-        update_option('so_coach_suchfilter', $existing_search );
         
-        $do_search = array('weekday' => MC_UTILS::so_getWeekday());
+        $existing_search['weekday'] = MC_UTILS::so_getWeekday();
 
-        if (isset($_POST['so_save_booking_filter_submit'])) {
     
             if (!empty($select_visited_filter)) {
                 if($select_visited_filter==="gefehlt"){
-                    $do_search['visited'] = 0;
+                    $existing_search['visited'] = 0;
                 }
                 if($select_visited_filter==="teilgenommen"){
-                    $do_search['visited'] = 1;
+                    $existing_search['visited'] = 1;
                 }
             }
     
             if (!empty($select_kurs_filter)) {
-                    $do_search['event_hours_id'] = $select_kurs_filter;
+                $existing_search['event_hours_id'] = $select_kurs_filter;
             }
     
-            //if (!(empty($select_kurs_filter) && empty($select_visited_filter))) {
-                // Die Option "so_coach_suchfilter" existiert nicht oder der Wert hat sich geändert
-                update_option('so_coach_suchfilter', $do_search);
-                $existing_search = get_option('so_coach_suchfilter', false);
-            //} 
-            
-            if ($existing_search === false) {
-                // Option "so_coach_suchfilter" existiert nicht, füge sie hinzu
-                add_option('so_coach_suchfilter', $do_search);
-            }
 
-        } elseif (isset($_POST['status'])) {
             // Führen Sie hier den Code aus, um den Status des Datensatzes mit der angegebenen ID zu aktualisieren
             // Verwenden Sie beispielsweise eine Datenbankabfrage, um den Status zu aktualisieren
             
@@ -85,10 +71,6 @@ class SO_COACH_List_Table extends WP_List_Table {
                 array( '%d' )
             );
             
-            // Optional: Weiterleitung zur aktualisierten Seite oder Ausgabe einer Erfolgsmeldung
-            wp_redirect( $_SERVER['REQUEST_URI'] ); // Weiterleitung zur aktuellen Seite
-            exit;
-        }
 
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
@@ -138,7 +120,7 @@ class SO_COACH_List_Table extends WP_List_Table {
 
     public function soFilterSaveBookings() {
         $output = '';
-        $selectedKursFilter = get_option('so_coach_suchfilter', false);
+        $selectedKursFilter = isset($_POST['select-kurs-filter']) ? $_POST['select-kurs-filter'] : '';
         $args = [];
         $args = array('weekday' => MC_UTILS::so_getWeekday());
         $bookings = self::get_data_from_database($args);
@@ -186,8 +168,8 @@ class SO_COACH_List_Table extends WP_List_Table {
                 $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
 
                 $selected = '';
-                if(isset($selectedKursFilter['event_hours_id'])){
-                    if ($selectedKursFilter['event_hours_id'] == $eventID) {
+                if(isset($selectedKursFilter)){
+                    if ($selectedKursFilter == $eventID) {
                         $selected = 'selected="selected"';
                     }
                 }
@@ -200,8 +182,7 @@ class SO_COACH_List_Table extends WP_List_Table {
     }
 
     public function soFilterEventVisited() {
-        $selectedStatus = get_option('so_coach_suchfilter', false);
-
+        $selectedStatus = isset($_POST['select-Visited-filter']) ? $_POST['select-Visited-filter'] : '';
 
         $output = '';
         $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
@@ -209,13 +190,13 @@ class SO_COACH_List_Table extends WP_List_Table {
         $output .= '<option value="">Alle Status</option>';
         
         $selected = '';
-        if(isset($selectedStatus['visited'])){
-            if((int) $selectedStatus['visited']==0){
+        if(!empty($selectedStatus)){
+            if($selectedStatus==='gefehlt'){
                 $selected = 'selected="selected"';
                 $output .= '<option value="gefehlt" '. $selected . '>gefehlt</option>';
                 $output .= '<option value="teilgenommen">teilgenommen</option>';
             }
-            if((int) $selectedStatus['visited']==1){
+            if($selectedStatus==='teilgenommen'){
                 $selected = 'selected="selected"';
                 $output .= '<option value="gefehlt">gefehlt</option>';
                 $output .= '<option value="teilgenommen" '. $selected . '>teilgenommen</option>';
