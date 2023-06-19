@@ -127,13 +127,6 @@ class SO_COACH_List_Table extends WP_List_Table {
                 .tablenav .actions select{
                     font-size:1em !important;
                 }
-                .tablenav {
-                    clear: none !important;
-                    height: 10px !important;
-                    margin: 6px 0 4px !important;
-                    padding-top: 5px !important;
-                    vertical-align: middle !important;
-                }
                 .tablenav .view-switch, .tablenav.top .actions {
                     display:block !important;
                 }
