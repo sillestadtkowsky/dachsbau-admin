@@ -121,6 +121,24 @@ class SO_COACH_List_Table extends WP_List_Table {
             $output .= self::soFilterEventVisited();
             $output .= '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
             $output .= '</div>';
+            $output .= '    
+            <style>
+            @media screen and (max-width: 782px) {
+                .tablenav .actions select{
+                    font-size:1em !important;
+                }
+                .tablenav {
+                    clear: none !important;
+                    height: 10px !important;
+                    margin: 6px 0 4px !important;
+                    padding-top: 5px !important;
+                    vertical-align: middle !important;
+                }
+                .tablenav .view-switch, .tablenav.top .actions {
+                    display:block !important;
+                }
+            }
+            </style>';
             echo $output;
         }
     }
