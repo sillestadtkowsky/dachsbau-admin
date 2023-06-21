@@ -71,7 +71,7 @@ class SO_COACH_List_Table extends WP_List_Table {
                 array( '%d' )
             );
             
-
+        $existing_search['orderby'] = 'user';
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
 
