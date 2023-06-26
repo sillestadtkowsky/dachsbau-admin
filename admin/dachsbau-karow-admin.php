@@ -361,11 +361,12 @@ function so_dachsbau_admin_config() {
     </div>
     <?php
 }
-
+/*
 function so_booking_page(){
     $instance = SP_Bookings::get_instance();
     $instance->screen_option();
 }
+*/
 
 function so_booking_export_page() {
     SP_Bookings::bookings_export_page();

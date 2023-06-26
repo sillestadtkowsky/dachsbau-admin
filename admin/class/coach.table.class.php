@@ -71,7 +71,9 @@ class SO_COACH_List_Table extends WP_List_Table {
                 array( '%d' )
             );
             
-        $existing_search['orderby'] = 'user';
+        $existing_search['orderby'] = !empty($_GET['orderby']) ? $_GET['orderby'] : 'user_name';
+        $existing_search['order'] = !empty($_GET['order']) ? $_GET['order'] : 'ASC';
+
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
 
@@ -87,6 +89,8 @@ class SO_COACH_List_Table extends WP_List_Table {
         $sortable = $this->get_sortable_columns();
 
         $this->_column_headers = array($columns, $hidden, $sortable);
+        usort($data, array(&$this, 'usort_reorder'));
+
         $this->items = $data;
     }
 
@@ -96,6 +100,28 @@ class SO_COACH_List_Table extends WP_List_Table {
         return TT_DB::getBookings($do_search);
     }
 
+    function usort_reorder($a, $b)
+    {
+        $a = (array) $a; 
+        $b = (array) $b; 
+        $orderby = (!empty($_GET['orderby'])) ? sanitize_text_field($_GET['orderby']) : 'user_name';
+        $order = (!empty($_GET['order'])) ? sanitize_text_field($_GET['order']) : 'DESC';
+        $testresult = strcmp($a[$orderby], $b[$orderby]);
+        return ($order === 'desc') ? $testresult : -$testresult;
+    }
+
+    
+    function get_sortable_columns() {
+        return array(
+            'visited' => array('visited', true),
+            'event_title' => array('event_title', true),
+            'guest_message' => array('guest_message', true),
+            'user_name' => array('user_name', true),
+            'user_email' => array('user_email', true),
+            'eventDate' => array('eventDate', true),
+            'start' => array('start', true)
+        );
+    }
     public function extra_tablenav($which) {
         if ($which == 'top') {
             $output = '<div class="alignleft actions">';
@@ -212,25 +238,24 @@ class SO_COACH_List_Table extends WP_List_Table {
     }    
 
     function column_default( $item, $column_name ) {
+        $guest = (int) $item['guest_id'];
         switch ( $column_name ) {
             // Andere Spalten hier
             case 'guest_message':
-                $userId = (int) $item['user_id'];
-                if($userId == 1){
+                
+                if($guest == 0){
                     return 'intern';
                 }else{
                     return $item['guest_message'];
                 }
             case 'user_name':
-                $userId = (int) $item['user_id'];
-                if($userId == 1){
+                if($guest == 0){
                     return $item['user_name'];
                 }else{
                     return $item['guest_name'];
                 }
             case 'user_email':
-                $userId = (int) $item['user_id'];
-                if($userId == 1){
+                if($guest == 0){
                     return $item['user_email'];
                 }else{
                     return $item['guest_email'];
