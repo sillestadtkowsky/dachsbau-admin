@@ -20,12 +20,9 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_columns() {
         return array(
             'visited'=>'Status',
-            'event_title' => 'Kursname',
-            'guest_message' => 'Mitgliedsnummer',
             'user_name' => 'Name',
-            'user_email' => 'Email',
-            'eventDate'=>'Kurstag',          
-            'start' => 'Kursbeginn'
+            'guest_message' => 'Mitgliedsnummer',
+            'event_title' => 'Kursname'
         );
     }
 
@@ -118,7 +115,7 @@ class SO_COACH_List_Table extends WP_List_Table {
    
         $this->_column_headers = array($columns, $hidden, $sortable_columns, 'user_name');
     
-        usort($data, array(&$this, 'usort_reorder'));
+       // usort($data, array(&$this, 'usort_reorder'));
 
         $this->items = $data;
 
@@ -153,12 +150,7 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_sortable_columns() {
         return array(
             'visited' => array('visited', true),
-            'event_title' => array('event_title', true),
-            'guest_message' => array('guest_message', true),
-            'user_name' => array('user_name', true),
-            'user_email' => array('user_email', true),
-            'eventDate' => array('eventDate', true),
-            'start' => array('start', true)
+            'user_name' => array('user_name', true)
         );
     }
     public function extra_tablenav($which) {
@@ -292,12 +284,6 @@ class SO_COACH_List_Table extends WP_List_Table {
                     return $item['user_name'];
                 }else{
                     return $item['guest_name'];
-                }
-            case 'user_email':
-                if($guest == 0){
-                    return $item['user_email'];
-                }else{
-                    return $item['guest_email'];
                 }
             case 'visited':
                 $status = (int) $item['visited'];
