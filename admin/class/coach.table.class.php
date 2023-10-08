@@ -110,7 +110,6 @@ class SO_COACH_List_Table extends WP_List_Table {
 
         $columns = $this->get_columns();
         $hidden = array();
-        $sortable = $this->get_sortable_columns();
 
         $_GET['select-Visited-filter'] = $select_visited_filter;
         $_GET['select-kurs-filter'] = $select_kurs_filter;
