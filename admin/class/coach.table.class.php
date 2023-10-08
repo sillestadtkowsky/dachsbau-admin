@@ -33,10 +33,11 @@ class SO_COACH_List_Table extends WP_List_Table {
     function prepare_items($search ='') {
 
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
-        $select_visited_filter = isset($_POST['select-Visited-filter']) ? $_POST['select-Visited-filter'] : '';
-        $select_kurs_filter = isset($_POST['select-kurs-filter']) ? $_POST['select-kurs-filter'] : '';
+        $select_visited_filter = isset($_REQUEST['select-Visited-filter']) ? $_REQUEST['select-Visited-filter'] : '';
+        $select_kurs_filter = isset($_REQUEST['select-kurs-filter']) ? $_REQUEST['select-kurs-filter'] : '';
         $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
         $status = isset($_POST['status']) ? $_POST['status'] : '';
+
         
         $existing_search['eventDate'] = MC_UTILS::getNow();
         
@@ -74,10 +75,33 @@ class SO_COACH_List_Table extends WP_List_Table {
         $existing_search['orderby'] = !empty($_GET['orderby']) ? $_GET['orderby'] : 'user_name';
         $existing_search['order'] = !empty($_GET['order']) ? $_GET['order'] : 'ASC';
 
+        
+        
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
-
         $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
+
+            // Aktualisieren Sie die Filterwerte in der URL, wenn die Tabelle sortiert wird
+        $current_url = remove_query_arg(array('orderby', 'order'));
+        if (!empty($_GET['s'])) {
+            $current_url = add_query_arg('s', $_GET['s'], $current_url);
+        }
+        if (!empty($_GET['select-Visited-filter'])) {
+            $current_url = add_query_arg('select-Visited-filter', $_GET['select-Visited-filter'], $current_url);
+        }
+        if (!empty($_GET['select-kurs-filter'])) {
+            $current_url = add_query_arg('select-kurs-filter', $_GET['select-kurs-filter'], $current_url);
+        }
+
+        $this->set_pagination_args(array(
+            'total_items' => $total_items,
+            'per_page' => $per_page,
+            'total_pages' => ceil($total_items / $per_page),
+            'current_page' => $this->get_pagenum(),
+            'current_url' => $current_url,
+        ));
+
+        
 
         $this->set_pagination_args(array(
             'total_items' => $total_items,
@@ -88,10 +112,26 @@ class SO_COACH_List_Table extends WP_List_Table {
         $hidden = array();
         $sortable = $this->get_sortable_columns();
 
-        $this->_column_headers = array($columns, $hidden, $sortable);
+        $_GET['select-Visited-filter'] = $select_visited_filter;
+        $_GET['select-kurs-filter'] = $select_kurs_filter;
+
+        $sortable_columns = $this->get_sortable_columns();
+   
+        $this->_column_headers = array($columns, $hidden, $sortable_columns, 'user_name');
+    
         usort($data, array(&$this, 'usort_reorder'));
 
         $this->items = $data;
+
+        $output='';
+            // Verwenden Sie die aktualisierten Filterwerte beim erneuten Rendern der Tabelle
+        $output .= '<input type="hidden" name="s" value="' . esc_attr($search) . '">';
+        $output .= '<input type="hidden" name="select-Visited-filter" value="' . esc_attr($select_visited_filter) . '">';
+        $output .= '<input type="hidden" name="select-kurs-filter" value="' . esc_attr($select_kurs_filter) . '">';
+        $output .= '<input type="hidden" name="orderby" value="' . $existing_search['orderby'] . '">';
+        $output .= '<input type="hidden" name="order" value="' . $existing_search['order'] . '">';
+
+        echo $output;
     }
 
     
