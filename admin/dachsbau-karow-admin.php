@@ -393,18 +393,27 @@ function so_schedule_booking_page() {
 function so_coach_booking_page() {
     require_once('class/so-kurs-scheduler/booking-current-admin-table-class.php');
     $coach_booking_list_table = new SO_COACH_List_Table();
+
+    // Filterdaten aus der URL auslesen
+    $spotkurs_filter = isset($_GET['select-kurs-filter']) ? sanitize_text_field($_GET['select-kurs-filter']) : '';
+
+    // Die Filterdaten auf das Filterfeld anwenden
+    echo '<div class="wrap">';
+    echo '<h2>Dachse Coach Bereich</h2>';
+    echo '<p>Hier wird den Trainern ermöglicht, für die an diesem Tag stattfindenden Kurs die Mitglieder als "Anwesend" oder "Abwesend" zu markieren.</p>';
+    echo '<form method="get">';
+    echo '<input type="hidden" name="page" value="so_coach_booking_page" />';
+    echo '<h3>Übersicht</h3>';
+    
+    
+    // Tabelle vorbereiten
     $coach_booking_list_table->prepare_items();
-    ?>
-    <div class="wrap">
-        <h2>Dachse Coach Bereich</h2>
-        <p>Hier wird den Trainern ermöglicht, für die an diesem Tag stattfindenden Kurs die Mitglieder als "Anwesend" oder "Abwesend" zu markieren.</p>
-        <form method="post">
-         <input type="hidden" name="page" value="wp_list_table_class" />
-        <h3>Übersicht </h3>
-        <?php $coach_booking_list_table->display(); ?>
-        </form>
-    </div>
-    <?php
+    
+    // Die Tabelle anzeigen
+    $coach_booking_list_table->display();
+
+    echo '</form>';
+    echo '</div>';
 }
 
 function so_current_booking_page() {

@@ -6,7 +6,7 @@ ob_start();
  * Plugin Name:       dachsbau-admin
  * Plugin URI:        https://plugins-wordpress-osowsky-webdesign.info
  * Description:       Prüft beim Buchen eines Kurse auf eine gültige Mitgliedsnummer und lässt das aktualisieren der Mitgliedsnummern im Admin Bereich zu. Des weiteren werden verschiedene Konfigurationen und Bearbeitungslisten angeboten.
- * Version:           2.4.4
+ * Version:           2.4.7
  * Requires at least: 6.1.2
  * Requires PHP:      7.2
  * Author:            Silvio Osowsky <i class="fas fa-heart"></i>

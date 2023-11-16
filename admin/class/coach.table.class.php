@@ -32,8 +32,8 @@ class SO_COACH_List_Table extends WP_List_Table {
         $search = !empty($_REQUEST['s']) ? $_REQUEST['s'] : '';
         $select_visited_filter = isset($_REQUEST['select-Visited-filter']) ? $_REQUEST['select-Visited-filter'] : '';
         $select_kurs_filter = isset($_REQUEST['select-kurs-filter']) ? $_REQUEST['select-kurs-filter'] : '';
-        $booking_Id = isset($_POST['id']) ? $_POST['id'] : '';
-        $status = isset($_POST['status']) ? $_POST['status'] : '';
+        $booking_Id = isset($_REQUEST['id']) ? $_REQUEST['id'] : '';
+        $status = isset($_REQUEST['status']) ? $_REQUEST['status'] : '';
 
         
         $existing_search['eventDate'] = MC_UTILS::getNow();
@@ -69,25 +69,25 @@ class SO_COACH_List_Table extends WP_List_Table {
                 array( '%d' )
             );
             
-        $existing_search['orderby'] = !empty($_GET['orderby']) ? $_GET['orderby'] : 'user_name';
-        $existing_search['order'] = !empty($_GET['order']) ? $_GET['order'] : 'ASC';
+        $existing_search['orderby'] = !empty($_REQUEST['orderby']) ? $_REQUEST['orderby'] : 'user_name';
+        $existing_search['order'] = !empty($_REQUEST['order']) ? $_REQUEST['order'] : 'ASC';
 
         
         
         $data = $this->get_data_from_database($existing_search);
         $total_items = count($data);
-        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
+        $per_page = isset( $_REQUEST['per_page'] ) ? absint( $_REQUEST['per_page'] ) : 50;
 
             // Aktualisieren Sie die Filterwerte in der URL, wenn die Tabelle sortiert wird
         $current_url = remove_query_arg(array('orderby', 'order'));
-        if (!empty($_GET['s'])) {
-            $current_url = add_query_arg('s', $_GET['s'], $current_url);
+        if (!empty($_REQUEST['s'])) {
+            $current_url = add_query_arg('s', $_REQUEST['s'], $current_url);
         }
-        if (!empty($_GET['select-Visited-filter'])) {
-            $current_url = add_query_arg('select-Visited-filter', $_GET['select-Visited-filter'], $current_url);
+        if (!empty($_REQUEST['select-Visited-filter'])) {
+            $current_url = add_query_arg('select-Visited-filter', $_REQUEST['select-Visited-filter'], $current_url);
         }
-        if (!empty($_GET['select-kurs-filter'])) {
-            $current_url = add_query_arg('select-kurs-filter', $_GET['select-kurs-filter'], $current_url);
+        if (!empty($_REQUEST['select-kurs-filter'])) {
+            $current_url = add_query_arg('select-kurs-filter', $_REQUEST['select-kurs-filter'], $current_url);
         }
 
         $this->set_pagination_args(array(
@@ -108,14 +108,14 @@ class SO_COACH_List_Table extends WP_List_Table {
         $columns = $this->get_columns();
         $hidden = array();
 
-        $_GET['select-Visited-filter'] = $select_visited_filter;
-        $_GET['select-kurs-filter'] = $select_kurs_filter;
+        $_REQUEST['select-Visited-filter'] = $select_visited_filter;
+        $_REQUEST['select-kurs-filter'] = $select_kurs_filter;
 
         $sortable_columns = $this->get_sortable_columns();
    
         $this->_column_headers = array($columns, $hidden, $sortable_columns, 'user_name');
     
-       // usort($data, array(&$this, 'usort_reorder'));
+       //usort($data, array(&$this, 'usort_reorder'));
 
         $this->items = $data;
 
@@ -140,19 +140,36 @@ class SO_COACH_List_Table extends WP_List_Table {
     {
         $a = (array) $a; 
         $b = (array) $b; 
-        $orderby = (!empty($_GET['orderby'])) ? sanitize_text_field($_GET['orderby']) : 'user_name';
-        $order = (!empty($_GET['order'])) ? sanitize_text_field($_GET['order']) : 'DESC';
+        $orderby = (!empty($_REQUEST['orderby'])) ? sanitize_text_field($_REQUEST['orderby']) : 'user_name';
+        $order = (!empty($_REQUEST['order'])) ? sanitize_text_field($_REQUEST['order']) : 'DESC';
         $testresult = strcmp($a[$orderby], $b[$orderby]);
         return ($order === 'desc') ? $testresult : -$testresult;
     }
 
     
     function get_sortable_columns() {
-        return array(
+        $sortable_columns = array(
             'visited' => array('visited', true),
             'user_name' => array('user_name', true)
         );
+    
+        // Hier sammeln Sie die Filterdaten
+        $select_kurs_filter = isset($_REQUEST['select-kurs-filter']) ? sanitize_text_field($_REQUEST['select-kurs-filter']) : '';
+    
+        // Ändern der Sortierlinks
+        foreach ($sortable_columns as $column_key => $column_data) {
+            $order = (isset($_REQUEST['order']) && in_array($_REQUEST['order'], array('asc', 'desc'))) ? sanitize_text_field($_REQUEST['order']) : 'asc';
+    
+            // Fügen Sie die Filterdaten zur URL hinzu
+            $url = admin_url('admin.php?page=so_coach_booking_page&orderby=' . $column_data[0] . '&order=' . $order . '&select-kurs-filter=' . $select_kurs_filter);
+    
+            // Spaltentitel-Link erstellen
+            $sortable_columns[$column_key][1] = '<a href="' . esc_url($url) . '">' . $column_data[1] . '</a>';
+        }
+    
+        return $sortable_columns;
     }
+
     public function extra_tablenav($which) {
         if ($which == 'top') {
             $output = '<div class="alignleft actions">';
@@ -177,7 +194,7 @@ class SO_COACH_List_Table extends WP_List_Table {
 
     public function soFilterSaveBookings() {
         $output = '';
-        $selectedKursFilter = isset($_POST['select-kurs-filter']) ? $_POST['select-kurs-filter'] : '';
+        $selectedKursFilter = isset($_REQUEST['select-kurs-filter']) ? $_REQUEST['select-kurs-filter'] : '';
         $args = [];
         $args = array('weekday' => MC_UTILS::so_getWeekday());
         $bookings = self::get_data_from_database($args);
@@ -188,6 +205,7 @@ class SO_COACH_List_Table extends WP_List_Table {
             $key = $booking['booking_id'];
             if (!isset($options[$key])) {
                 $options[$key] = array(
+                    'Name' => $booking['user_name'],
                     'id' => $booking['booking_id'],
                     'event_id' => $booking['event_hours_id'],
                     'Kurs' => $booking['event_title'],
@@ -199,16 +217,10 @@ class SO_COACH_List_Table extends WP_List_Table {
 
         // Sortiere das Array nach event_title, post_title und Kursbeginn
         usort($options, function($a, $b) {
-            $cmp1 = strnatcasecmp($a['Kurs'], $b['Kurs']);
+            $cmp1 = strnatcasecmp($a['Name'], $b['Name']);
             if ($cmp1 !== 0) {
                 return $cmp1;
             }
-            $cmp2 = strcmp($a['post_title'], $b['post_title']);
-            if ($cmp2 !== 0) {
-                return $cmp2;
-            }
-            $cmp3 = strcmp($a['Kursbeginn'], $b['Kursbeginn']);
-            return $cmp3;
         });
 
         $output .= '<label for="select-kurs-filter" class="screen-reader-text">Filtern nach Option:</label>';
@@ -239,7 +251,7 @@ class SO_COACH_List_Table extends WP_List_Table {
     }
 
     public function soFilterEventVisited() {
-        $selectedStatus = isset($_POST['select-Visited-filter']) ? $_POST['select-Visited-filter'] : '';
+        $selectedStatus = isset($_REQUEST['select-Visited-filter']) ? $_REQUEST['select-Visited-filter'] : '';
 
         $output = '';
         $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
