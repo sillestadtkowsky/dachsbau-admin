@@ -6,6 +6,7 @@ Plugin Name: Mein Plugin
 
 require_once( plugin_dir_path( __FILE__ ) . 'class/so-dachsbau-dashboard-class.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'class/coach.table.class.php' );
+require_once(plugin_dir_path(__FILE__) . 'class/coach/mail_to_user_class.php');
 
 new So_Dachsbau_Dashboard_Widget();
 
@@ -25,7 +26,10 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Bereich','Coach Bereich','manage_options','so_coach_booking_page','so_coach_booking_page');
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Kurse','Coach Kurse','manage_options','so_coach_booking_page','so_coach_booking_page');
+    $custom_mail_page = new CustomMailPage(); // Initialisieren Sie die Klasse
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($custom_mail_page, 'render_custom_mail_page'));
+
 
     if (current_user_can('trainer-dachs')) {
         add_menu_page(

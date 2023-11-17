@@ -1,0 +1,23 @@
+/* Fügen Sie diese CSS-Regeln in Ihre Stylesheet-Datei ein oder fügen Sie sie in Ihre Funktion custom_mail_page_custom_styles() hinzu */
+
+.flex-container {
+    display: flex;
+    flex-direction: column; /* Objekte untereinander anordnen */
+}
+
+.flex-item {
+    margin-bottom: 10px; /* Abstand zwischen den Objekten hinzufügen */
+    display: flex;
+    flex-direction: column; /* Labels und Eingabeelemente untereinander anordnen */
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px; /* Abstand zwischen Label und Eingabeelement hinzufügen */
+}
+
+/* Stilisieren Sie Ihre Formularelemente nach Bedarf */
+textarea {
+    height: 100px; /* Geben Sie der Textarea eine festgelegte Höhe */
+    resize: vertical; /* Erlauben Sie die vertikale Größenänderung der Textarea */
+}
