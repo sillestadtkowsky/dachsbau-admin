@@ -22,6 +22,9 @@ class CustomMailPage {
         $email_sent = false;
     
         if (isset($_POST['send_email']) && $this->validate_form()) {
+            
+            //
+            $this->sendMail($selectedCourse);
             $emailSubject = '';
             $emailContent = '';
             $email_sent = true;
@@ -32,18 +35,18 @@ class CustomMailPage {
         <div class="wrap">
             <h2>Mail an Kurteilnehmer verschicken</h2>
             <?php
-                // Wenn die E-Mail erfolgreich versendet wurde, geben Sie eine Erfolgsmeldung aus
-                if ($email_sent) {
-                    echo '<div class="updated"><p>E-Mail wurde erfolgreich versendet!</p></div>';
-                }
+            // Wenn die E-Mail erfolgreich versendet wurde, geben Sie eine Erfolgsmeldung aus
+            if ($email_sent) {
+                echo '<div class="updated"><p>E-Mail wurde erfolgreich versendet!</p></div>';
+            }
             ?>
-            <p>Wählen Sie einen Kurs. Erfassen Sie einen Betreff für die eMail und tragen Sie den Mail Inhalt in den Bereich Inhalt ein.</p>
-    
+            <p>Wählen Sie einen Kurs. Erfassen Sie einen Betreff für die E-Mail und tragen Sie den Mail-Inhalt in den Bereich Inhalt ein.</p>
+
             <form method="post" action="">
                 <div class="flex-container">
                     <div class="flex-item">
                         <?php
-                            echo $this->soFilterSaveBookings($email_sent); // Rufen Sie die Funktion auf und geben Sie den Rückgabewert aus
+                        echo $this->soFilterSaveBookings($email_sent); // Rufen Sie die Funktion auf und geben Sie den Rückgabewert aus
                         ?>
                     </div>
                     <div class="flex-item">
@@ -60,6 +63,7 @@ class CustomMailPage {
                 </div>
             </form>
         </div>
+
         <?php
     
         // Anzeigen von Fehler- und Erfolgsmeldungen
@@ -101,98 +105,99 @@ class CustomMailPage {
 
     public function soFilterSaveBookings($send_status) {
         $output = '';
-        if($send_status){
+        if ($send_status) {
             $selectedKursFilter = '0';
-        }else{
+        } else {
             $selectedKursFilter = isset($_REQUEST['selected_course']) ? $_REQUEST['selected_course'] : '0';
         }
-        
-        $args = [];
-        //$args = array('weekday' => MC_UTILS::so_getWeekday());
-        $bookings = self::get_data_from_database($args);
     
+        $args = [];
+        $args = array('hasBookings' => true);
+        $bookings = self::get_data_from_database($args);
+
         // Erstelle das $options Array aus der Datenbank-Abfrage
         $options = array();
+        $processedEventIds = array(); // Array, um verarbeitete 'event_id' zu speichern
+        
         foreach ($bookings as $booking) {
-            $key = $booking['booking_id'];
-            if (!isset($options[$key])) {
+            $eventID = $booking['event_hours_id'];
+        
+            // Überprüfen, ob diese 'event_id' bereits verarbeitet wurde
+            if (!in_array($eventID, $processedEventIds)) {
+                $key = $booking['booking_id'];
                 $options[$key] = array(
                     'Name' => $booking['user_name'],
                     'id' => $booking['booking_id'],
-                    'event_id' => $booking['event_hours_id'],
+                    'event_id' => $eventID,
                     'Kurs' => $booking['event_title'],
                     'post_title' => $booking['weekday'],
+                    'eventDate' => $booking['eventDate'],
                     'Kursbeginn' => $booking['start'],
                 );
+        
+                // Füge die 'event_id' zur Liste der verarbeiteten 'event_id' hinzu
+                $processedEventIds[] = $eventID;
             }
         }
-        // Definieren Sie die gewünschte Reihenfolge der Wochentage
-        $wochentage = array('Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So');
     
-        // Sortiere das Array zuerst nach der Reihenfolge der Wochentage im 'post_title'
-        usort($options, function($a, $b) use ($wochentage) {
-            $wochentagA = substr($a['post_title'], 0, 2); // Extrahieren Sie die ersten beiden Zeichen des Wochentags
-            $wochentagB = substr($b['post_title'], 0, 2); // Extrahieren Sie die ersten beiden Zeichen des Wochentags
+        // Stil für das Dropdown-Menü und die Anzahl der Buchungen
+        $dropdownStyle = 'style="width:200px; margin-right: 10px;"'; // Hier können Sie das Styling anpassen
     
-            $indexA = array_search($wochentagA, $wochentage);
-            $indexB = array_search($wochentagB, $wochentage);
-    
-            if ($indexA === false || $indexB === false) {
-                // Wenn ein Wochentag nicht in der Reihenfolge gefunden wird, gibt es keine Änderung der Reihenfolge
-                return 0;
-            }
-    
-            if ($indexA !== $indexB) {
-                // Wenn die Wochentage unterschiedlich sind, sortieren Sie nach der Reihenfolge der Wochentage
-                return $indexA - $indexB;
-            }
-    
-            // Wenn die Wochentage gleich sind, sortieren Sie nach dem Uhrzeit-String im Kursbeginn
-            $timeA = strtotime($a['Kursbeginn']);
-            $timeB = strtotime($b['Kursbeginn']);
-    
-            if ($timeA === false || $timeB === false) {
-                // Wenn die Zeit nicht geparst werden kann, gibt es keine Änderung der Reihenfolge
-                return 0;
-            }
-    
-            if ($timeA !== $timeB) {
-                // Wenn die Uhrzeiten unterschiedlich sind, sortieren Sie nach der Uhrzeit im Kursbeginn
-                return $timeA - $timeB;
-            }
-    
-            // Wenn die Uhrzeiten gleich sind, sortieren Sie nach dem Kurs (alphabetisch)
-            return strnatcasecmp($a['Kurs'], $b['Kurs']);
-        });
-    
+        $output .= '<form method="POST" action="">';
         $output .= '<label for="selected_course" class="screen-reader-text">Kurs:</label>';
-        $output .= '<select style="width:200px" name="selected_course" id="selected_course">';
+        $output .= '<div class="flex-item-container">';
+        $output .= '<div class="flex-item" ' . $dropdownStyle . '>';
+        $output .= '<select name="selected_course" id="selected_course">';
         $output .= '<option value="0">Alle Kurse</option>';
-    
-        $uniqueEventIDs = array(); // Array für eindeutige event_id-Werte
     
         foreach ($options as $option) {
             $eventID = $option['event_id'];
+            $selected = ($selectedKursFilter == $eventID) ? 'selected="selected"' : '';
     
-            // Überprüfen, ob die event_id bereits vorhanden ist
-            if (!in_array($eventID, $uniqueEventIDs)) {
-                $uniqueEventIDs[] = $eventID; // Hinzufügen der event_id zum Array der eindeutigen Werte
-    
-                $selected = '';
-                if ($selectedKursFilter == $eventID) {
-                    $selected = 'selected="selected"'; // Markieren Sie den ausgewählten Kurs
-                }
-                $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['post_title'] . ' | ' . $option['Kursbeginn'] . ' | ' . $option['Kurs']) . '</option>';
-            }
+            $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['post_title'] . ' | ' . date('d.m.Y', strtotime($option['eventDate'])) . ' | ' . $option['Kursbeginn'] . ' | ' . $option['Kurs']) . '</option>';
         }
     
         $output .= '</select>';
+        $output .= '</div>';
+    
+        $output .= '<div class="flex-item-container">'; // Öffnen Sie den Container
+        $output .= '<div class="flex-item teilnehmer-container">'; // Öffnen Sie den Container für Teilnehmer
+        $output .= '<label for="selected_course" class="screen-reader-text">Teilnehmer:</label>';
+        $output .= '<script>
+                        document.getElementById("selected_course").addEventListener("change", function() {
+                            this.form.submit(); // Das Formular automatisch senden, wenn eine Auswahl getroffen wird
+                        });
+                    </script>';
+        $output .= '<div class="teilnehmer-content">';
+        // Wenn eine neue Event-ID ausgewählt wurde, rufen Sie die Anzahl der Buchungen ab
+        $output .= 'Gemeldete Teilnehmer: <strong class="count">' . $this->getBookingCount($selectedKursFilter) . '</strong>';
+        $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
+        $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
+        
+        // Rest des Codes bleibt unverändert
+        
+        $output .= '</div>'; // Schließen Sie den Container
+        $output .= '</form>';
+        
         return $output;
     }
     
 
-    function get_data_from_database($do_search) {
-        return TT_DB::getBookings($do_search);
+    function get_data_from_database($arg) {
+        return TT_DB::getBookings($arg);
+
+    }
+
+    function getBookingCount($do_search) {
+        return TT_DB::getBookingCountForEvent($do_search);
+    }
+
+    function sendMail($courseNumber){
+        global $wpdb;
+        $args = [];
+        $args = array('weekday' => MC_UTILS::so_getWeekday());
+        $bookings = self::get_data_from_database($args);
+        
     }
 
     public function add_mail_page_to_menu() {

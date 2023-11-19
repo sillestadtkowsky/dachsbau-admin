@@ -1,4 +1,10 @@
 /* Fügen Sie diese CSS-Regeln in Ihre Stylesheet-Datei ein oder fügen Sie sie in Ihre Funktion custom_mail_page_custom_styles() hinzu */
+.flex-item-container {
+    display: flex;
+    justify-content: flex-start; /* Elemente nebeneinander anordnen */
+    align-items: center; /* Elemente vertikal zentrieren */
+    width: 100%; /* Breite auf 100% setzen */
+}
 
 .flex-container {
     display: flex;
@@ -9,6 +15,32 @@
     margin-bottom: 10px; /* Abstand zwischen den Objekten hinzufügen */
     display: flex;
     flex-direction: column; /* Labels und Eingabeelemente untereinander anordnen */
+}
+
+.teilnehmer {
+    display: flex;
+    background-color: burlywood;
+    padding: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    margin-right: 10px; /* Abstand zwischen "Teilnehmer:" und Anzahl hinzufügen */
+}
+
+.teilnehmer-container {
+    display: flex;
+    align-items: center; /* Vertikal zentrieren */
+}
+
+.teilnehmer-content {
+    background-color: coral;
+    padding: 10px;;
+    display: flex;
+    align-items: center; /* Elemente vertikal zentrieren */
+}
+
+.count {
+    margin-left: 5px; /* Abstand zwischen "Teilnehmer:" und Anzahl hinzufügen */
+    font-size: 1.8em;
 }
 
 label {
