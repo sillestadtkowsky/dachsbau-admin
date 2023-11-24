@@ -27,8 +27,8 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Kurse','Coach Kurse','manage_options','so_coach_booking_page','so_coach_booking_page');
-    $custom_mail_page = new CustomMailPage(); // Initialisieren Sie die Klasse
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($custom_mail_page, 'render_custom_mail_page'));
+    //$custom_mail_page = new CustomMailPage(); // Initialisieren Sie die Klasse
+    //add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($custom_mail_page, 'render_custom_mail_page'));
 
 
     if (current_user_can('trainer-dachs')) {
@@ -37,7 +37,7 @@ function so_DachsbauKarowAdminMenu()
             'Coach Übersicht',
             'trainer-dachs',
             'so_dachsbau-karow-coach-menu',
-            'so_coach_booking_page',
+            'so_coach_booking_page_coach',
             'dashicons-awards', // Hier wird das Icon definiert
             10
         );
@@ -398,9 +398,6 @@ function so_coach_booking_page() {
     require_once('class/so-kurs-scheduler/booking-current-admin-table-class.php');
     $coach_booking_list_table = new SO_COACH_List_Table();
 
-    // Filterdaten aus der URL auslesen
-    $spotkurs_filter = isset($_GET['select-kurs-filter']) ? sanitize_text_field($_GET['select-kurs-filter']) : '';
-
     // Die Filterdaten auf das Filterfeld anwenden
     echo '<div class="wrap">';
     echo '<h2>Dachse Coach Bereich</h2>';
@@ -415,6 +412,29 @@ function so_coach_booking_page() {
     
     // Die Tabelle anzeigen
     $coach_booking_list_table->display();
+
+    echo '</form>';
+    echo '</div>';
+}
+
+function so_coach_booking_page_coach() {
+    require_once('class/so-kurs-scheduler/booking-current-admin-table-class.php');
+    $coach_booking_list_table_coach = new SO_COACH_List_Table();
+
+    // Die Filterdaten auf das Filterfeld anwenden
+    echo '<div class="wrap">';
+    echo '<h2>Dachse Coach Bereich</h2>';
+    echo '<p>Hier wird den Trainern ermöglicht, für die an diesem Tag stattfindenden Kurs die Mitglieder als "Anwesend" oder "Abwesend" zu markieren.</p>';
+    echo '<form method="get">';
+    echo '<input type="hidden" name="page" value="so_dachsbau-karow-coach-menu" />';
+    echo '<h3>Übersicht</h3>';
+    
+    
+    // Tabelle vorbereiten
+    $coach_booking_list_table_coach->prepare_items();
+    
+    // Die Tabelle anzeigen
+    $coach_booking_list_table_coach->display();
 
     echo '</form>';
     echo '</div>';

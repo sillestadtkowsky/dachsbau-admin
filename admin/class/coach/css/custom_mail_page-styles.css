@@ -38,8 +38,8 @@
     align-items: center; /* Elemente vertikal zentrieren */
 }
 
-.count {
-    margin-left: 5px; /* Abstand zwischen "Teilnehmer:" und Anzahl hinzufügen */
+.mailCount {
+    margin: 0px 5px 0px 5px; /* Abstand zwischen "Teilnehmer:" und Anzahl hinzufügen */
     font-size: 1.8em;
 }
 
@@ -52,4 +52,8 @@ label {
 textarea {
     height: 100px; /* Geben Sie der Textarea eine festgelegte Höhe */
     resize: vertical; /* Erlauben Sie die vertikale Größenänderung der Textarea */
+}
+.submitMail{
+    padding: 8px;
+    cursor: pointer;
 }

@@ -5,6 +5,22 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
     require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
+function my_custom_page_capability() {
+    $capabilities = array('trainer-dachs', 'administrator'); // Fügen Sie hier Ihre Berechtigungen hinzu
+    $allowed = false;
+
+    foreach ($capabilities as $capability) {
+        if (current_user_can($capability)) {
+            $allowed = true;
+            break; // Wenn eine Berechtigung gefunden wurde, beenden Sie die Schleife
+        }
+    }
+
+    return $allowed;
+}
+
+add_filter('so_coach_page_capability', 'my_custom_page_capability');
+
 class SO_COACH_List_Table extends WP_List_Table {
 
     // Konstruktorfunktion
@@ -20,6 +36,7 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_columns() {
         return array(
             'visited'=>'Status',
+            'guest_phone'=>'Vorname',
             'user_name' => 'Name',
             'guest_message' => 'Mitgliedsnummer',
             'event_title' => 'Kursname'
@@ -211,6 +228,7 @@ class SO_COACH_List_Table extends WP_List_Table {
                     'Kurs' => $booking['event_title'],
                     'post_title' => $booking['weekday'],
                     'Kursbeginn' => $booking['start'],
+                    'Vorname' => $booking['guest_phone'],
                 );
             }
         }
@@ -284,6 +302,8 @@ class SO_COACH_List_Table extends WP_List_Table {
         $guest = (int) $item['guest_id'];
         switch ( $column_name ) {
             // Andere Spalten hier
+            case 'guest_phone':
+                return $item['guest_phone'];
             case 'guest_message':
                 
                 if($guest == 0){

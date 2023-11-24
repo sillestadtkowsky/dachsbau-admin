@@ -23,8 +23,15 @@ class CustomMailPage {
     
         if (isset($_POST['send_email']) && $this->validate_form()) {
             
-            //
-            $this->sendMail($selectedCourse);
+            $args = [];
+            $args = array(
+                'selectedCourse' => $selectedCourse,
+                'emailSubject' => $emailSubject,
+                'emailContent' => $emailContent,
+            );
+
+            // Mail an Teilnehmer verschicken
+            $this->sendMail($args);
             $emailSubject = '';
             $emailContent = '';
             $email_sent = true;
@@ -58,7 +65,7 @@ class CustomMailPage {
                         <textarea name="email_content" id="email_content" placeholder="Inhalt"><?php echo esc_textarea($emailContent); ?></textarea>
                     </div>
                     <div class="flex-item">
-                        <input type="submit" name="send_email" value="Jetzt versenden">
+                        <input type="submit" class="submitMail" name="send_email" value="Jetzt versenden">
                     </div>
                 </div>
             </form>
@@ -170,7 +177,7 @@ class CustomMailPage {
                     </script>';
         $output .= '<div class="teilnehmer-content">';
         // Wenn eine neue Event-ID ausgewählt wurde, rufen Sie die Anzahl der Buchungen ab
-        $output .= 'Gemeldete Teilnehmer: <strong class="count">' . $this->getBookingCount($selectedKursFilter) . '</strong>';
+        $output .= 'Die E-Mail wird an <strong class="mailCount">' . $this->getBookingCount($selectedKursFilter) . '</strong> gemeldete Teilnehmer verschickt. (Kopie an info@karowerdachse.de)';
         $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
         $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
         
@@ -192,11 +199,42 @@ class CustomMailPage {
         return TT_DB::getBookingCountForEvent($do_search);
     }
 
-    function sendMail($courseNumber){
+    function sendMail($args){
         global $wpdb;
-        $args = [];
-        $args = array('weekday' => MC_UTILS::so_getWeekday());
-        $bookings = self::get_data_from_database($args);
+        $selectedCourse = $args['selectedCourse'];
+        $emailSubject = $args['emailSubject'];
+        $emailContent = $args['emailContent'];
+        $bookings = self::get_data_from_database($selectedCourse);
+        
+        // Die Haupt-Empfängeradresse
+        $to = 'kontakt@osowsky-webdesign.de'; 
+        $subject = 'Karower Dachse: ' . $emailSubject;
+        $message = $emailContent;
+        $headers = 'von: Trainer Karower-Dachse <info@karowerdachse.de>' . "\r\n";
+
+        $all_emails = array(); // Array für alle E-Mail-Adressen
+        
+        foreach ($bookings as $booking) {
+            $user_email = $booking['user_email'];
+            $guest_email = $booking['guest_email'];
+        
+            // Prüfen Sie, ob die E-Mail-Adressen nicht leer sind und fügen Sie sie dem Array hinzu
+            if (!empty($user_email)) {
+                $all_emails[] = $user_email;
+            }
+            if (!empty($guest_email)) {
+                $all_emails[] = $guest_email;
+            }
+        }
+        
+        // Kommaseparierten String erstellen
+        $bcc = implode(', ', $all_emails);
+
+        // Wenn Sie zusätzliche Header für BCC-Adressen hinzufügen möchten, können Sie dies tun:
+        $headers .= 'Bcc: ' . $bcc . "\r\n";
+
+        // E-Mail senden
+        wp_mail($to, $subject, $message, $headers);
         
     }
 
