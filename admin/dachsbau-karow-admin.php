@@ -102,6 +102,15 @@ function so_dachsbau_admin_info_page() {
     <?php
 }
 
+add_action( 'admin_enqueue_scripts', 'so_coach_enqueue_admin_script' );
+
+function so_coach_enqueue_admin_script() {
+    // Pfad zur JavaScript-Datei
+    $script_path = 'js/wp-admin.js'; // Pfad anpassen
+
+    // Skript registrieren und einreihen
+    wp_enqueue_script( 'so-admin-script', get_template_directory_uri() . $script_path, array( 'jquery' ), '1.0', true );
+}
 
 
     function so_coach_table_shortcode( $atts ) {
@@ -153,6 +162,7 @@ function so_dachsbau_admin_config() {
 
     // Schalter speichern
     if (isset($_POST['submit'])) {
+        update_option('so_coach_mail_to', isset($_POST['so_coach_mail_to']) ? sanitize_text_field($_POST['so_coach_mail_to']) : '');
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_strong_group_mail', isset($_POST['so_kurs_strong_group_mail']) ? sanitize_text_field($_POST['so_kurs_strong_group_mail']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
@@ -194,16 +204,30 @@ function so_dachsbau_admin_config() {
     $so_scheduler_time  = get_option('so_scheduler_time', '23:00');
     $pdf_export_name = get_option('so_pdf_export_name', 'gesicherte-buchungen');
     $so_kurs_online_search_name = get_option('so_kurs_online_search_name', 'online');
+    $so_coach_mail_to = get_option('so_coach_mail_to', 'info@karowerdachse.de');
     $so_kurs_strong_group_mail_adresse = get_option('so_kurs_strong_group_mail_adresse', 'info@karowerdachse.de');
     $so_kurs_names_description = get_option('so_kurs_names_description', '** feste Gruppe **');
     $so_kurs_names = get_option('so_kurs_names', array());
 
     ?>
-    <div class="wrap" style="max-width: 800px;">
+    <div class="wrap">
         <h2>Konfigurationen</h2>
         <p>Hier kannst du diverse Konfigurationen vornehmen.</p>
+
+           <!-- Tab-Links -->
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Buchungssicherung')">Automat zur Buchungssicherung und Verwaltung</button>
+            <button class="tablinks" onclick="openTab(event, 'Kursschliessung')">Steuerung der Kursschliessung</button>
+            <button class="tablinks" onclick="openTab(event, 'FesteGruppen')">Kennzeichnung fester Gruppen</button>
+            <button class="tablinks" onclick="openTab(event, 'OnlineGruppen')">Kennzeichnung online Gruppen</button>
+            <button class="tablinks" onclick="openTab(event, 'BuchungenStartzeit')">Startzeit erneute Buchungen</button>
+            <button class="tablinks" onclick="openTab(event, 'Dokumentation')">Auswertung und Dokumentation</button>
+            <button class="tablinks" onclick="openTab(event, 'TrainerMail')">Trainer Mail an Kursteilnehmer</button>
+            <!-- Weitere Tabs können hier hinzugefügt werden -->
+        </div>
+
         <form method="post" style="padding: 20px 0px 20px 0px;">
-            <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235); border-left: 3px solid #012c6d;">
+            <div id="Buchungssicherung" class="tabcontent" style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235); border-left: 3px solid #012c6d;">
                 <h3>Automat zur Buchungssicherung und Verwaltung</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
@@ -228,7 +252,7 @@ function so_dachsbau_admin_config() {
                     </div>
                 </div>
             </div>
-            <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
+            <div id="Kursschliessung" class="tabcontent" style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
                 <h3>Steuerung der Kursschliessung</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
@@ -244,7 +268,7 @@ function so_dachsbau_admin_config() {
                     </div>
                 </div>
             </div>
-            <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+            <div id="FesteGruppen" class="tabcontent" style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
                 <h3>Kennzeichnung fester Gruppen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
@@ -305,11 +329,11 @@ function so_dachsbau_admin_config() {
                     </div>
                     <div style="display: block; margin-top: 10px;">
                         <label style="vertical-align: top; padding: 0px 5px 0px 10px;" for="so_kurs_online_search_name" >eMailadresse:</label>
-                        <input type="text" name="so_kurs_strong_group_mail_adresse" id="o_kurs_strong_group_mail_adresse" value="<?php echo esc_attr($so_kurs_strong_group_mail_adresse); ?>">
+                        <input type="text" name="so_kurs_strong_group_mail_adresse" id="so_kurs_strong_group_mail_adresse" value="<?php echo esc_attr($so_kurs_strong_group_mail_adresse); ?>">
                     </div>
                 </div>
             </div>
-            <div style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
+            <div id="OnlineGruppen" class="tabcontent" style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
                 <h3>Kennzeichnung online Gruppen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: block; width: 250px; text-align: left;">
@@ -330,7 +354,7 @@ function so_dachsbau_admin_config() {
                     </div>
                 </div>
             </div>
-            <div style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
+            <div id="BuchungenStartzeit" class="tabcontent" style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235);  border-left: 3px solid #012c6d;">
                 <h3>Startzeit erneute Buchungen</h3>
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
@@ -344,19 +368,34 @@ function so_dachsbau_admin_config() {
                 </div>
             </div>
               
-            <div style="padding: 10px; margin-bottom: 20px; border-left: 3px solid #012c6d;">
+            <div id="Dokumentation" class="tabcontent" style="padding: 10px; margin-bottom: 20px; border-left: 3px solid #012c6d;">
                 <h3>Auwertung und Dokumentation</h3>    
                 <div style="display: flex; align-items: flex-start;">
-                        <div style="display: inline-block; width: 250px; text-align: left;">
-                            <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at">Name des PDF-Exports:</label>
-                            <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
-                        </div>
-                        <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
-                            <input type="text" name="so_pdf_export_name" id="so_pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
-                            <span style="display: inline-block; margin-left: 5px;">.csv</span>
-                        </div>
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_close_at">Name des PDF-Exports:</label>
+                        <p style="margin-top: 0;">Geben Sie hier den Namen des PDF-Exports ein. Der Dateityp .csv wird automatisch angehängt.</p>
+                    </div>
+                    <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                        <input type="text" name="so_pdf_export_name" id="so_pdf_export_name" value="<?php echo esc_attr($pdf_export_name); ?>">
+                        <span style="display: inline-block; margin-left: 5px;">.csv</span>
                     </div>
                 </div>
+            </div>
+
+            <div id="TrainerMail" class="tabcontent" style="padding: 10px; margin-bottom: 20px; background-color:rgb(235, 235, 235); border-left: 3px solid #012c6d;">
+                <h3>Trainer Mail an Kursteilnehmer</h3>    
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">eMail Info:</label>
+                        <p style="margin-top: 0;">An welche eMail soll die Trainer Mail in Kopie gesendet werden?</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px;">
+                        <label style="vertical-align: top; padding: 0px 5px 0px 10px;" for="so_coach_mail_to" >eMailadresse:</label>
+                        <input type="text" name="so_coach_mail_to" id="so_coach_mail_to" value="<?php echo esc_attr($so_coach_mail_to); ?>">
+                    </div>
+                </div>
+            </div>
+            
                 <!-- Submit-Button -->
             <div style="margin-top: 20px;"  border-left: 3px solid #012c6d;>
                     <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;"><u>ALLE</u> Änderungen speichern</button>
