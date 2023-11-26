@@ -10,6 +10,12 @@ require_once(plugin_dir_path(__FILE__) . 'class/coach/mail_to_user_class.php');
 
 new So_Dachsbau_Dashboard_Widget();
 
+function enqueue_media_uploader() {
+    wp_enqueue_media();
+}
+add_action('admin_enqueue_scripts', 'enqueue_media_uploader');
+
+
 /*
 * ###############################
 * ADD Admin Menu
@@ -25,11 +31,11 @@ function so_DachsbauKarowAdminMenu()
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Aktuelle Buchungen','Aktuelle Buchungen','manage_options','timetable_admin_bookings','timetable_admin_bookings');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Buchungen exportieren', 'Buchungen exportieren', 'manage_options', 'so_booking_export_page', 'so_booking_export_page');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Gesicherte Buchungen','Gesicherte Buchungen','manage_options','so_schedule-booking','so_schedule_booking_page');
-    add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
     add_submenu_page('so_dachsbau-karow-admin-menu', 'Coach Kurse','Coach Kurse','manage_options','so_coach_booking_page','so_coach_booking_page');
-    //$custom_mail_page = new CustomMailPage(); // Initialisieren Sie die Klasse
-    //add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($custom_mail_page, 'render_custom_mail_page'));
-
+    $custom_mail_page = new CustomMailPage(); // Initialisieren Sie die Klasse
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($custom_mail_page, 'render_custom_mail_page'));
+    add_submenu_page('so_dachsbau-karow-admin-menu', 'Konfiguration','Konfiguration','manage_options','so_dachsbau_admin_config','so_dachsbau_admin_config');
+    
 
     if (current_user_can('trainer-dachs')) {
         add_menu_page(
@@ -88,28 +94,18 @@ function so_dachsbau_admin_info_page() {
             <a href="<?php echo admin_url('admin.php?page=so_schedule-booking'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                  <h3>Gesicherte Buchungen</h3>
                 <p>Verwalte hier automatisch gesicherte Buchungen.</p>
-            </a>           
+            </a>       
+            <a href="<?php echo admin_url('admin.php?page=so_coach_booking_page'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
+                <h3>Trainer Übersicht</h3>
+                <p>Hier wird den Trainer ermöglicht, für den aktuell stattfindenden Kurs die Mitglieder als "Anwesende" zu markieren. </p>
+            </a>    
             <a href="<?php echo admin_url('admin.php?page=so_dachsbau_admin_config'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
                 <h3>Konfiguration</h3>
                 <p>Nehme hier optionale Einstellungen vor </p>
             </a>
-            <a href="<?php echo admin_url('admin.php?page=so_coach_booking_page'); ?>" class="card" style="background-color: #d0e3ff; color: #d012c6d; text-align: center; padding: 20px; width: 300px; border-radius: 10px; transition: background-color 0.2s ease;">
-                <h3>Trainer Übersicht</h3>
-                <p>Hier wird den Trainer ermöglicht, für den aktuell stattfindenden Kurs die Mitglieder als "Anwesende" zu markieren. </p>
-            </a>
         </div>
     </div>
     <?php
-}
-
-add_action( 'admin_enqueue_scripts', 'so_coach_enqueue_admin_script' );
-
-function so_coach_enqueue_admin_script() {
-    // Pfad zur JavaScript-Datei
-    $script_path = 'js/wp-admin.js'; // Pfad anpassen
-
-    // Skript registrieren und einreihen
-    wp_enqueue_script( 'so-admin-script', get_template_directory_uri() . $script_path, array( 'jquery' ), '1.0', true );
 }
 
 
@@ -162,7 +158,10 @@ function so_dachsbau_admin_config() {
 
     // Schalter speichern
     if (isset($_POST['submit'])) {
+        update_option('so_coach_mail_footer_logo_url', isset($_POST['so_coach_mail_footer_logo_url']) ? sanitize_text_field($_POST['so_coach_mail_footer_logo_url']) : '');
+        update_option('so_coach_mail_footer', isset($_POST['so_coach_mail_footer']) ? sanitize_textarea_field($_POST['so_coach_mail_footer']) : '');
         update_option('so_coach_mail_to', isset($_POST['so_coach_mail_to']) ? sanitize_text_field($_POST['so_coach_mail_to']) : '');
+        update_option('so_coach_mail_betreff', isset($_POST['so_coach_mail_betreff']) ? sanitize_text_field($_POST['so_coach_mail_betreff']) : '');
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_strong_group_mail', isset($_POST['so_kurs_strong_group_mail']) ? sanitize_text_field($_POST['so_kurs_strong_group_mail']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
@@ -204,7 +203,10 @@ function so_dachsbau_admin_config() {
     $so_scheduler_time  = get_option('so_scheduler_time', '23:00');
     $pdf_export_name = get_option('so_pdf_export_name', 'gesicherte-buchungen');
     $so_kurs_online_search_name = get_option('so_kurs_online_search_name', 'online');
+    $so_coach_mail_footer_logo_url = get_option('so_coach_mail_footer_logo_url');
     $so_coach_mail_to = get_option('so_coach_mail_to', 'info@karowerdachse.de');
+    $so_coach_mail_betreff  = get_option('so_coach_mail_betreff', 'Karowerdachse - Wichtige Kursinfo:');
+    $so_coach_mail_footer  = get_option('so_coach_mail_footer', 'Karowerdachse - Wichtige Kursinfo:');
     $so_kurs_strong_group_mail_adresse = get_option('so_kurs_strong_group_mail_adresse', 'info@karowerdachse.de');
     $so_kurs_names_description = get_option('so_kurs_names_description', '** feste Gruppe **');
     $so_kurs_names = get_option('so_kurs_names', array());
@@ -386,16 +388,44 @@ function so_dachsbau_admin_config() {
                 <h3>Trainer Mail an Kursteilnehmer</h3>    
                 <div style="display: flex; align-items: flex-start;">
                     <div style="display: inline-block; width: 250px; text-align: left;">
-                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">eMail Info:</label>
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">eMailadresse:</label>
                         <p style="margin-top: 0;">An welche eMail soll die Trainer Mail in Kopie gesendet werden?</p>
                     </div>
                     <div style="display: block; margin-top: 10px;">
-                        <label style="vertical-align: top; padding: 0px 5px 0px 10px;" for="so_coach_mail_to" >eMailadresse:</label>
-                        <input type="text" name="so_coach_mail_to" id="so_coach_mail_to" value="<?php echo esc_attr($so_coach_mail_to); ?>">
+                        <input type="text" size="50" name="so_coach_mail_to" id="so_coach_mail_to" value="<?php echo esc_attr($so_coach_mail_to); ?>">
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Zusätzlicher Betreff:</label>
+                        <p style="margin-top: 0;">Dieser Text wird automatisch vor den Betreff des Trainers hinzugefügt.</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px;">
+                        <input type="text" size="50" name="so_coach_mail_betreff" id="so_coach_mail_betreff" value="<?php echo esc_attr($so_coach_mail_betreff); ?>">
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Fussbereich der eMail</label>
+                        <p style="margin-top: 0;">Dieser Text wird am Ende der Mail angehängt.</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px;">
+                         <textarea name="so_coach_mail_footer" id="so_coach_mail_footer" rows="4" cols="50"><?php echo esc_textarea($so_coach_mail_footer); ?></textarea>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                        <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Logo</label>
+                        <p style="margin-top: 0;">Auswahl eines Logos für den Fussbereich der eMail.</p>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-top: 10px;">
+                        <input type="hidden" name="so_coach_mail_footer_logo_url" id="so_coach_mail_footer_logo_url" value="<?php echo esc_attr($so_coach_mail_footer_logo_url); ?>" style="flex-grow: 1; margin-right: 10px;">
+                        <button id="mein_bild_button">Bild auswählen</button>
+                        <button id="remove_bild_button" type="button" style="display: <?php echo $so_coach_mail_footer_logo_url ? 'block' : 'none'; ?>;">Bild entfernen</button>
+                        <img id="bild_vorschau" src="<?php echo esc_url($so_coach_mail_footer_logo_url); ?>" style="max-width: 100px; max-height: 100px; margin-left: 50px; display: <?php echo $so_coach_mail_footer_logo_url ? 'block' : 'none'; ?>;"/>
                     </div>
                 </div>
             </div>
-            
                 <!-- Submit-Button -->
             <div style="margin-top: 20px;"  border-left: 3px solid #012c6d;>
                     <button type="submit" name="submit" class="button button-primary" style="background-color: #d0e3ff; color: #2271b1;"><u>ALLE</u> Änderungen speichern</button>

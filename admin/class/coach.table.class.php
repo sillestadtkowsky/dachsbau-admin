@@ -36,7 +36,6 @@ class SO_COACH_List_Table extends WP_List_Table {
     function get_columns() {
         return array(
             'visited'=>'Status',
-            'guest_phone'=>'Vorname',
             'user_name' => 'Name',
             'guest_message' => 'Mitgliedsnummer',
             'event_title' => 'Kursname'
@@ -301,11 +300,7 @@ class SO_COACH_List_Table extends WP_List_Table {
     function column_default( $item, $column_name ) {
         $guest = (int) $item['guest_id'];
         switch ( $column_name ) {
-            // Andere Spalten hier
-            case 'guest_phone':
-                return $item['guest_phone'];
             case 'guest_message':
-                
                 if($guest == 0){
                     return 'intern';
                 }else{
@@ -315,7 +310,7 @@ class SO_COACH_List_Table extends WP_List_Table {
                 if($guest == 0){
                     return $item['user_name'];
                 }else{
-                    return $item['guest_name'];
+                    return $item['guest_name'] . ', ' . $item['guest_phone'];
                 }
             case 'visited':
                 $status = (int) $item['visited'];

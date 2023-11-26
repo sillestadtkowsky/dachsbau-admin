@@ -9,13 +9,45 @@ function openTab(evt, tabName) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
     document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
+
+    // Überprüfen, ob ein Event vorhanden ist
+    if (evt) {
+        evt.currentTarget.className += " active";
+    } else {
+        // Setzen Sie den aktiven Tab, wenn kein Event vorhanden ist
+        for (i = 0; i < tablinks.length; i++) {
+            if (tablinks[i].textContent.trim() === 'Automat zur Buchungssicherung und Verwaltung') {
+                tablinks[i].className += " active";
+                break;
+            }
+        }
+    }
 }
 
 jQuery(document).ready(function($){
     console.log('jquery-load');   
 
-    openTab(new Event('click'), 'Buchungssicherung');
+    $('#mein_bild_button').click(function(e) {
+        e.preventDefault();
+        var custom_uploader = wp.media({
+            title: 'Bild auswählen',
+            button: {
+                text: 'Bild verwenden'
+            },
+            multiple: false
+        }).on('select', function() {
+            var attachment = custom_uploader.state().get('selection').first().toJSON();
+            $('#so_coach_mail_footer_logo_url').val(attachment.url); // URL in das versteckte Textfeld setzen
+            $('#bild_vorschau').attr('src', attachment.url).show(); // Bildvorschau aktualisieren und anzeigen
+            $('#remove_bild_button').show(); // "Bild entfernen"-Button anzeigen
+        }).open();
+    });
+
+    $('#remove_bild_button').click(function() {
+        $('#so_coach_mail_footer_logo_url').val(''); // URL aus dem versteckten Feld entfernen
+        $('#bild_vorschau').hide(); // Bildvorschau ausblenden
+        $(this).hide(); // "Bild entfernen"-Button ausblenden
+    });
 
     $(".editMembers").css("display", "none");
     $(".newMember").css("display", "none");
@@ -76,5 +108,9 @@ jQuery(document).ready(function($){
             }
         });
     });
+
+    setTimeout(function() {
+        openTab(null, 'Buchungssicherung');
+    }, 100);
 
 }); 

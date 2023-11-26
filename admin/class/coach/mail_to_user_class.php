@@ -25,7 +25,8 @@ class CustomMailPage {
             
             $args = [];
             $args = array(
-                'selectedCourse' => $selectedCourse,
+                'hasBookings' => true,
+                'event_hours_id' => $selectedCourse,
                 'emailSubject' => $emailSubject,
                 'emailContent' => $emailContent,
             );
@@ -201,16 +202,13 @@ class CustomMailPage {
 
     function sendMail($args){
         global $wpdb;
-        $selectedCourse = $args['selectedCourse'];
         $emailSubject = $args['emailSubject'];
         $emailContent = $args['emailContent'];
-        $bookings = self::get_data_from_database($selectedCourse);
+        $bookings = self::get_data_from_database($args);
         
         // Die Haupt-Empfängeradresse
-        $to = 'kontakt@osowsky-webdesign.de'; 
-        $subject = 'Karower Dachse: ' . $emailSubject;
-        $message = $emailContent;
-        $headers = 'von: Trainer Karower-Dachse <info@karowerdachse.de>' . "\r\n";
+        $to = get_option('so_coach_mail_to'); 
+        $subject = get_option('so_coach_mail_betreff') . ' | ' .$emailSubject;
 
         $all_emails = array(); // Array für alle E-Mail-Adressen
         
@@ -226,12 +224,36 @@ class CustomMailPage {
                 $all_emails[] = $guest_email;
             }
         }
+
+        $dateString = $bookings[0]['eventDate'];
+
+        // Erstellen eines DateTime-Objekts aus dem gegebenen Datum im Format YYYY-MM-DD
+        $dateObject = DateTime::createFromFormat('Y-m-d', $dateString);
+    
+        // Umwandeln in das gewünschte Format DD.MM.YYYY
+        $formattedDate = $dateObject->format('d.m.Y');
+        
+        $message = '<div>';
+        $message .= '<div><b>Lieber Dachs, </b></div>';
+        $message .= '<div>es gibt Informationen zu einem deiner gebuchten Kurse!</div>';
+        $message .= '<h3>Betrifft folgende Kursbuchung:</h3>';
+        $message .= '<div><b>Kurs: </b>' . $bookings[0]['event_title'] . '</div>';
+        $message .= '<div><b>Tag: </b>' . $formattedDate . '</div>';
+        $message .= '<div><b>Uhrzeit: </b>' . $bookings[0]['start'] . '</div>';
+        $message .= '<h3>Info zu deiner Kursbuchung:</h3>';
+        $message .= $emailContent;
+        $message .= '</div>';
         
         // Kommaseparierten String erstellen
         $bcc = implode(', ', $all_emails);
 
         // Wenn Sie zusätzliche Header für BCC-Adressen hinzufügen möchten, können Sie dies tun:
+        $headers = 'From: Karowerdachse Trainer <' . $to . '>' . "\r\n";
+        $headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
         $headers .= 'Bcc: ' . $bcc . "\r\n";
+        
+
+        $message .= '<br>' . nl2br(get_option('so_coach_mail_footer')) . '<br><img id="bild_vorschau" src="' . esc_url(get_option('so_coach_mail_footer_logo_url')) . '" style="max-width: 100px; max-height: 100px;"/>';
 
         // E-Mail senden
         wp_mail($to, $subject, $message, $headers);
