@@ -41,7 +41,7 @@ class CustomMailPage {
         // Hier können Sie das Formular anzeigen
         ?>
         <div class="wrap">
-            <h2>Mail an Kurteilnehmer verschicken</h2>
+            <h2>Mail an Kursteilnehmer verschicken</h2>
             <?php
             // Wenn die E-Mail erfolgreich versendet wurde, geben Sie eine Erfolgsmeldung aus
             if ($email_sent) {
@@ -262,7 +262,7 @@ class CustomMailPage {
 
     public function add_mail_page_to_menu() {
         add_menu_page('Dachsbau-Admin', 'Dachsbau-Admin', 'manage_options', 'so_dachsbau-karow-admin-menu', 'so_dachsbau_admin_info_page', 'dashicons-list-view', 5);
-        add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kurteilnehmer', 'Mail an Kurteilnehmer', 'manage_options', 'so_mail_to_user', array($this, 'render_custom_mail_page'));
+        add_submenu_page('so_dachsbau-karow-admin-menu', 'Mail an Kursteilnehmer', 'Mail an Kursteilnehmer', 'manage_options', 'so_mail_to_user', array($this, 'render_custom_mail_page'));
 
         // Weitere Untermenüpunkte hier hinzufügen
     }
