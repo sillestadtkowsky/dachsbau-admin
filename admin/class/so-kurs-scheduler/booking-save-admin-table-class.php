@@ -93,7 +93,7 @@ class SO_EventBookingTable extends WP_List_Table
 
     function get_views() {
         $views = array();
-        $current = isset( $_GET['post_status'] ) ? $_GET['post_status'] : 'all';
+        $current = isset( $_REQUEST['post_status'] ) ? $_REQUEST['post_status'] : 'all';
      
         $views['all'] = sprintf( '<a href="%s" %s>%s</a>', remove_query_arg( 'post_status' ), $current === 'all' ? 'class="current"' : '', __( 'All', 'textdomain' ) );
         $views['publish'] = sprintf( '<a href="%s" %s>%s</a>', add_query_arg( 'post_status', 'publish' ), $current === 'publish' ? 'class="current"' : '', __( 'Published', 'textdomain' ) );
@@ -163,7 +163,7 @@ class SO_EventBookingTable extends WP_List_Table
         $current_screen->render_per_page_options();
         
         // Hole die Werte für Spalten und Zeilen aus der URL
-        $per_page = isset( $_GET['per_page'] ) ? absint( $_GET['per_page'] ) : 50;
+        $per_page = isset( $_REQUEST['per_page'] ) ? absint( $_REQUEST['per_page'] ) : 50;
  
         // Rufe die Daten ab und setze sie in die Tabelle ein
         $this->items = $this->get_table_data();
@@ -243,8 +243,8 @@ class SO_EventBookingTable extends WP_List_Table
     {
         $a = (array) $a; 
         $b = (array) $b; 
-        $orderby = (!empty($_GET['orderby'])) ? sanitize_text_field($_GET['orderby']) : 'Id';
-        $order = (!empty($_GET['order'])) ? sanitize_text_field($_GET['order']) : 'DESC';
+        $orderby = (!empty($_REQUEST['orderby'])) ? sanitize_text_field($_REQUEST['orderby']) : 'Id';
+        $order = (!empty($_REQUEST['order'])) ? sanitize_text_field($_REQUEST['order']) : 'DESC';
         $testresult = strcmp($a[$orderby], $b[$orderby]);
         return ($order === 'desc') ? $testresult : -$testresult;
     }
@@ -332,14 +332,20 @@ class SO_EventBookingTable extends WP_List_Table
     }
 
     public function soFilterEventVisited() {
+        $selected = '';
+        if (isset($_REQUEST['select-Visited-filter'])) {
+            $selected = $_REQUEST['select-Visited-filter'];
+        }
         $output = '';
         $output .= '<label for="select-Visited-filter" class="screen-reader-text">Filtern nach Option:</label>';
         $output .= '<select style="width:200px" name="select-Visited-filter" id="select-Visited-filter">';
         $output .= '<option value="">Alle Status</option>';
         
-        $output .= '<option value="gefehlt">gefehlt</option>';
-        $output .= '<option value="teilgenommen">teilgenommen</option>';
-
+        // Überprüfung für "gefehlt"
+        $output .= '<option value="gefehlt"' . ($selected == 'gefehlt' ? ' selected="selected"' : '') . '>gefehlt</option>';
+        // Überprüfung für "teilgenommen"
+        $output .= '<option value="teilgenommen"' . ($selected == 'teilgenommen' ? ' selected="selected"' : '') . '>teilgenommen</option>';
+    
         $output .= '</select>';
         return $output;
     }
@@ -383,8 +389,8 @@ class SO_EventBookingTable extends WP_List_Table
 
         foreach ($options as $option) {
             $selected = '';
-            if (isset($_GET['select-kurs-filter'])) {
-                $selected = ($_GET['select-kurs-filter'] == $option['event_id']) ? 'selected="selected"' : '';
+            if (isset($_REQUEST['select-kurs-filter'])) {
+                $selected = ($_REQUEST['select-kurs-filter'] == $option['event_hours_id']) ? 'selected="selected"' : '';
             }
             $output .= '<option value="' . esc_html($option['event_hours_id']) . '" ' . $selected . '>' . esc_html($option['Kurs'] . ' | ' . $option['post_title'] . ' | ' . $option['Kursbeginn']) . '</option>';
         }

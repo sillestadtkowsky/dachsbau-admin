@@ -454,8 +454,8 @@ function so_schedule_booking_page() {
         <h2>Gesicherte Buchungen verwalten</h2>
         <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
         <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
-        <form method="post">
-         <input type="hidden" name="page" value="wp_list_table_class" />
+        <form method="get">
+         <input type="hidden" name="page" value="so_schedule-booking" />
         <h3>Vergangene Buchungen </h3>
         <?php $booking_list_table->display(); ?>
         </form>
@@ -518,8 +518,8 @@ function so_current_booking_page() {
         <h2>Gesicherte Buchungen verwalten</h2>
         <p>Hier siehst du alle Buchungen, welche automatisch vor der automatischen Wiedereröffung der Buchungen für einen Kurs gelöscht wurden.</p>
         <p>Du kannst Buchungen in Ruhe nach erfolgter Prüfung exportieren und/oder löschen. :)</p>
-        <form method="post">
-         <input type="hidden" name="page" value="wp_list_table_class" />
+        <form method="get">
+         <input type="hidden" name="page" value="so_schedule-booking" />
         <h3>Vergangene Buchungen </h3>
         <?php $booking_list_table->display(); ?>
         </form>
