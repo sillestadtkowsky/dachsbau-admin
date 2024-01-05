@@ -47,6 +47,7 @@ function so_DachsbauKarowAdminMenu()
             'dashicons-awards', // Hier wird das Icon definiert
             10
         );
+        add_submenu_page('so_dachsbau-karow-coach-menu', 'Mail an Kursteilnehmer', 'Mail an Kursteilnehmer', 'trainer-dachs', 'so_mail_to_user_coach_page', array($custom_mail_page, 'render_custom_mail_page'));
     }
 }
 add_action('admin_menu', 'so_DachsbauKarowAdminMenu');
