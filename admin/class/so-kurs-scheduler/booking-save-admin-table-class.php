@@ -272,42 +272,44 @@ class SO_EventBookingTable extends WP_List_Table
 
     public function process_bulk_action()
     {
-        global $wpdb;
-    
-        // Bulk-Action auswerten
-        $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
-        $bookings = isset($_REQUEST['booking_id']) ? $_REQUEST['booking_id'] : array();
-    
-        if ('export' === $action) {
-            self::handle_booking_export($bookings);
-            // Aktualisiere die Adminseite
-            wp_redirect(admin_url('admin.php?page=so_schedule-booking'));
-            echo $bookings;
-            exit;
-        }
-
-        if ('delete' === $action) {
-            if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes') {
-                foreach ($bookings as $booking_id) {
-                    $wpdb->delete("{$wpdb->prefix}event_booking_saves", array('booking_id' => $booking_id));
-                }
+        if (!isset($_REQUEST['so_save_booking_filter_submit'])) {
+            global $wpdb;
+        
+            // Bulk-Action auswerten
+            $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+            $bookings = isset($_REQUEST['booking_id']) ? $_REQUEST['booking_id'] : array();
+        
+            if ('export' === $action) {
+                self::handle_booking_export($bookings);
                 // Aktualisiere die Adminseite
                 wp_redirect(admin_url('admin.php?page=so_schedule-booking'));
+                echo $bookings;
                 exit;
-            } else {
-                echo '<script>
-                    var confirmed = confirm("Du willst die ausgewählten Buchungen aus der Datenbank entfernen?");
-                    if (confirmed) {
-                        var form = document.createElement("form");
-                        form.method = "post";
-                        form.action = "' . admin_url('admin.php?page=so_schedule-booking') . '";
-                        form.innerHTML = \'<input type="hidden" name="action" value="delete">\';
-                        form.innerHTML += \'<input type="hidden" name="booking_id[]" value="' . implode('"><input type="hidden" name="booking_id[]" value="', $bookings) . '">\';
-                        form.innerHTML += \'<input type="hidden" name="confirm_delete" value="yes">\';
-                        document.body.appendChild(form);
-                        form.submit();
+            }
+
+            if ('delete' === $action) {
+                if (isset($_POST['confirm_delete']) && $_POST['confirm_delete'] === 'yes') {
+                    foreach ($bookings as $booking_id) {
+                        $wpdb->delete("{$wpdb->prefix}event_booking_saves", array('booking_id' => $booking_id));
                     }
-                </script>';
+                    // Aktualisiere die Adminseite
+                    wp_redirect(admin_url('admin.php?page=so_schedule-booking'));
+                    exit;
+                } else {
+                    echo '<script>
+                        var confirmed = confirm("Du willst die ausgewählten Buchungen aus der Datenbank entfernen?");
+                        if (confirmed) {
+                            var form = document.createElement("form");
+                            form.method = "post";
+                            form.action = "' . admin_url('admin.php?page=so_schedule-booking') . '";
+                            form.innerHTML = \'<input type="hidden" name="action" value="delete">\';
+                            form.innerHTML += \'<input type="hidden" name="booking_id[]" value="' . implode('"><input type="hidden" name="booking_id[]" value="', $bookings) . '">\';
+                            form.innerHTML += \'<input type="hidden" name="confirm_delete" value="yes">\';
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    </script>';
+                }
             }
         }
     }
