@@ -54,7 +54,7 @@ class CustomMailPage {
                 <div class="flex-container">
                     <div class="flex-item">
                         <?php
-                        echo $this->soFilterSaveBookings($email_sent); // Rufen Sie die Funktion auf und geben Sie den Rückgabewert aus
+                        echo $this->soCoachKursAuswahl($email_sent); // Rufen Sie die Funktion auf und geben Sie den Rückgabewert aus
                         ?>
                     </div>
                     <div class="flex-item">
@@ -111,7 +111,7 @@ class CustomMailPage {
         return true;
     }
 
-    public function soFilterSaveBookings($send_status) {
+    public function soCoachKursAuswahl($send_status) {
         $output = '';
         if ($send_status) {
             $selectedKursFilter = '0';
@@ -153,40 +153,46 @@ class CustomMailPage {
     
         $output .= '<form method="POST" action="">';
         $output .= '<label for="selected_course" class="screen-reader-text">Kurs:</label>';
-        $output .= '<div class="flex-item-container">';
+        
+        // Übergeordneter Container für alles
+        $output .= '<div class="flex-container">'; // Dies setzt die Elemente untereinander
+        
+        // Dropdown für die Kursauswahl
         $output .= '<div class="flex-item" ' . $dropdownStyle . '>';
         $output .= '<select name="selected_course" id="selected_course">';
         $output .= '<option value="0">Alle Kurse</option>';
-    
+        
         foreach ($options as $option) {
             $eventID = $option['event_id'];
             $selected = ($selectedKursFilter == $eventID) ? 'selected="selected"' : '';
-    
             $output .= '<option value="' . esc_html($eventID) . '" ' . $selected . '>' . esc_html($option['post_title'] . ' | ' . date('d.m.Y', strtotime($option['eventDate'])) . ' | ' . $option['Kursbeginn'] . ' | ' . $option['Kurs']) . '</option>';
         }
-    
+        
         $output .= '</select>';
-        $output .= '</div>';
-    
-        $output .= '<div class="flex-item-container">'; // Öffnen Sie den Container
-        $output .= '<div class="flex-item teilnehmer-container">'; // Öffnen Sie den Container für Teilnehmer
-        $output .= '<label for="selected_course" class="screen-reader-text">Teilnehmer:</label>';
+        $output .= '</div>'; // Schließen des Dropdown-Containers
+        
+        // Teilnehmer-Anzeige
+        $output .= '<div class="teilnehmer-content">';
+        // Hol dir die Anzahl der gemeldeten Teilnehmer
+        $mailCount = $this->getBookingCount($selectedKursFilter);
+
+        // Überprüfen, ob es 1 gemeldeter Teilnehmer ist oder mehrere und den Text entsprechend anpassen
+        if ($mailCount == 1) {
+            $output .= '<strong class="mailCount">' . $mailCount . '</strong> gemeldeter Teilnehmer wird per Mail informiert. (Kopie an info@karowerdachse.de)';
+        } else {
+            $output .= '<strong class="mailCount">' . $mailCount . '</strong> gemeldete Teilnehmer werden per Mail informiert. (Kopie an info@karowerdachse.de)';
+        }
+
+        $output .= '</div>'; // Schließen der Teilnehmer-Anzeige
+        
+        $output .= '</div>'; // Schließen des übergeordneten Containers
         $output .= '<script>
                         document.getElementById("selected_course").addEventListener("change", function() {
                             this.form.submit(); // Das Formular automatisch senden, wenn eine Auswahl getroffen wird
                         });
                     </script>';
-        $output .= '<div class="teilnehmer-content">';
-        // Wenn eine neue Event-ID ausgewählt wurde, rufen Sie die Anzahl der Buchungen ab
-        $output .= 'Die E-Mail wird an <strong class="mailCount">' . $this->getBookingCount($selectedKursFilter) . '</strong> gemeldete Teilnehmer verschickt. (Kopie an info@karowerdachse.de)';
-        $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
-        $output .= '</div>'; // Schließen Sie den Container für Teilnehmer
-        
-        // Rest des Codes bleibt unverändert
-        
-        $output .= '</div>'; // Schließen Sie den Container
         $output .= '</form>';
-        
+                
         return $output;
     }
     
