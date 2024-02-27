@@ -26,6 +26,7 @@ class CustomMailPage {
             $args = [];
             $args = array(
                 'hasBookings' => true,
+                'orderby' => 'date',
                 'event_hours_id' => $selectedCourse,
                 'emailSubject' => $emailSubject,
                 'emailContent' => $emailContent,
@@ -120,7 +121,11 @@ class CustomMailPage {
         }
     
         $args = [];
-        $args = array('hasBookings' => true);
+        $args = array(
+            'hasBookings' => true,
+            'orderby' => 'event'
+        );
+        
         $bookings = self::get_data_from_database($args);
 
         // Erstelle das $options Array aus der Datenbank-Abfrage
