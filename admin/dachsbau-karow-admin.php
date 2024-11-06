@@ -165,6 +165,8 @@ function so_dachsbau_admin_config() {
         update_option('so_coach_mail_betreff', isset($_POST['so_coach_mail_betreff']) ? sanitize_text_field($_POST['so_coach_mail_betreff']) : '');
         update_option('so_scheduler_enabled', isset($_POST['so_scheduler_enabled']) ? sanitize_text_field($_POST['so_scheduler_enabled']) : '');
         update_option('so_kurs_strong_group_mail', isset($_POST['so_kurs_strong_group_mail']) ? sanitize_text_field($_POST['so_kurs_strong_group_mail']) : '');
+        update_option('so_kurs_waitinglist_active', isset($_POST['so_kurs_waitinglist_active']) ? sanitize_text_field($_POST['so_kurs_waitinglist_active']) : '');
+        update_option('so_kurs_waitinglist_active_admin', isset($_POST['so_kurs_waitinglist_active_admin']) ? sanitize_text_field($_POST['so_kurs_waitinglist_active_admin']) : '');
         update_option('so_kurs_close_at', isset($_POST['so_kurs_close_at']) ? sanitize_text_field($_POST['so_kurs_close_at']) : '');
         update_option('so_pdf_export_name', isset($_POST['so_pdf_export_name']) ? sanitize_text_field($_POST['so_pdf_export_name']) : '');
         update_option('so_kurs_online_search_name', isset($_POST['so_kurs_online_search_name']) ? sanitize_text_field($_POST['so_kurs_online_search_name']) : '');
@@ -199,6 +201,8 @@ function so_dachsbau_admin_config() {
     $so_kurs_online_name_color_background = get_option('so_kurs_online_name_color_background', '1');
     $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
     $so_kurs_strong_group_mail = get_option('so_kurs_strong_group_mail', '1');
+    $so_kurs_waitinglist_active = get_option('so_kurs_waitinglist_active', '1');
+    $so_kurs_waitinglist_active_admin = get_option('so_kurs_waitinglist_active_admin', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
     $so_scheduler_time  = get_option('so_scheduler_time', '23:00');
@@ -221,6 +225,7 @@ function so_dachsbau_admin_config() {
         <div class="tab">
             <button class="tablinks" onclick="openTab(event, 'Buchungssicherung')">Automat zur Buchungssicherung und Verwaltung</button>
             <button class="tablinks" onclick="openTab(event, 'Kursschliessung')">Steuerung der Kursschliessung</button>
+            <button class="tablinks" onclick="openTab(event, 'Warteliste')">Steuerung der Warteliste</button>
             <button class="tablinks" onclick="openTab(event, 'FesteGruppen')">Kennzeichnung fester Gruppen</button>
             <button class="tablinks" onclick="openTab(event, 'OnlineGruppen')">Kennzeichnung online Gruppen</button>
             <button class="tablinks" onclick="openTab(event, 'BuchungenStartzeit')">Startzeit erneute Buchungen</button>
@@ -268,6 +273,33 @@ function so_dachsbau_admin_config() {
                             <option value="so_close_kurs_at_15_minutes_before_start_time" <?php selected('so_close_kurs_at_15_minutes_before_start_time', $so_kurs_close_at); ?>>15 Minuten vor Kursbeginn</option>
                             <option value="so_close_kurs_at_30_minutes_before_start_time" <?php selected('so_close_kurs_at_30_minutes_before_start_time', $so_kurs_close_at); ?>>30 Minuten vor Kursbeginn</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+            <div id="Warteliste" class="tabcontent" style="padding: 10px; margin-bottom: 20px;  border-left: 3px solid #012c6d;">
+                <h3>Steuerung der Warteliste</h3>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                            <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Warteliste aktiv?</label>
+                            <p style="margin-top: 0;">Soll die Warteliste aktiviert werden?</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px; padding: 0px 5px 0px 10px">
+                        <select name="so_kurs_waitinglist_active" id="so_kurs_waitinglist_active">
+                            <option value="1" <?php selected('1', $so_kurs_waitinglist_active); ?>>Ja</option>
+                            <option value="0" <?php selected('0', $so_kurs_waitinglist_active); ?>>Nein</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="display: inline-block; width: 250px; text-align: left;">
+                            <label style="font-weight: bold; vertical-align: top;" for="so_kurs_names_description">Nur für Administratoren sichtbar?</label>
+                            <p style="margin-top: 0;">Soll die Warteliste ausschliesslich für Administratoren sichtbar sein?</p>
+                    </div>
+                    <div style="display: block; margin-top: 10px; padding: 0px 5px 0px 10px">
+                            <select name="so_kurs_waitinglist_active_admin" id="so_kurs_waitinglist_active_admin">
+                                <option value="1" <?php selected('1', $so_kurs_waitinglist_active_admin); ?>>Ja</option>
+                                <option value="0" <?php selected('0', $so_kurs_waitinglist_active_admin); ?>>Nein</option>
+                            </select>
                     </div>
                 </div>
             </div>
