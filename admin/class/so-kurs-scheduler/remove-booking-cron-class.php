@@ -41,9 +41,14 @@
         }
     
         function so_getUpcomingEvents() {
+            // zu löschende Buchungen holen
             $bookings_to_delete = self::so_getBookingsToDelete();
+            // zu löschende Buchungen sichern
             self::so_saveBookingsToTable($bookings_to_delete);
+            // zu löschende Buchungen löschen
             self::so_deleteBookings($bookings_to_delete);
+            // etwaige zu löschende Warteliste Einträge löschen
+            self::so_deleteWaitingLists($bookings_to_delete);
             return $bookings_to_delete;
         }
         
@@ -157,6 +162,42 @@
                     $wpdb->delete($table_event_hours_booking, array('booking_id' => $booking_id));
                 }
             }
+        }
+
+        function so_deleteWaitingLists($bookings) {
+            function so_deleteWaitingLists($bookings) {
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'waitlist';
+            
+                // Überprüfen, ob das $bookings-Array Daten enthält
+                if (!empty($bookings)) {
+                    foreach ($bookings as $booking) {
+                        if (isset($booking['event_hours_id'])) {
+                            $event_id = intval($booking['event_hours_id']);
+            
+                            // Löscht Einträge in der Warteliste-Tabelle, die mit der event_id übereinstimmen
+                            $deleted = $wpdb->delete(
+                                $table_name,
+                                array('event_id' => $event_id),
+                                array('%d')
+                            );
+            
+                            if ($deleted === false) {
+                                // Falls ein Fehler auftritt
+                                error_log("Fehler beim Löschen der Wartelisten-Einträge für event_id: " . $event_id);
+                            } else {
+                                // Erfolgreiches Löschen protokollieren (optional)
+                                error_log("Wartelisten-Einträge für event_id: " . $event_id . " wurden erfolgreich gelöscht.");
+                            }
+                        } else {
+                            error_log("Warnung: 'event_hours_id' in einem der Buchungen fehlt.");
+                        }
+                    }
+                } else {
+                    error_log("Warnung: $bookings-Array ist leer. Keine Wartelisten-Einträge zu löschen.");
+                }
+            }
+            
         }
         
         function so_getWeekday() {
