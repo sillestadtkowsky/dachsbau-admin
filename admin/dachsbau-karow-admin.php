@@ -201,7 +201,7 @@ function so_dachsbau_admin_config() {
     $so_kurs_online_name_color_background = get_option('so_kurs_online_name_color_background', '1');
     $so_scheduler_enabled = get_option('so_scheduler_enabled', '1');
     $so_kurs_strong_group_mail = get_option('so_kurs_strong_group_mail', '1');
-    $so_kurs_waitinglist_active = get_option('so_kurs_waitinglist_active', '1');
+    $so_kurs_waitinglist_active = get_option('so_kurs_waitinglist_active', '0');
     $so_kurs_waitinglist_active_admin = get_option('so_kurs_waitinglist_active_admin', '1');
     $so_kurs_close_at = get_option('so_kurs_close_at', 'so_close_kurs_at_start_time');
     $so_kurs_booking_open_time = get_option('so_kurs_booking_open_time', '12:00');
