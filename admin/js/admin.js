@@ -8,7 +8,10 @@ function openTab(evt, tabName) {
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-    document.getElementById(tabName).style.display = "block";
+    
+    if(document.getElementById(tabName) !== null){
+        document.getElementById(tabName).style.display = "block";
+    }
 
     // Überprüfen, ob ein Event vorhanden ist
     if (evt) {

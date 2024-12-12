@@ -314,16 +314,53 @@ class SO_EventBookingTable extends WP_List_Table
         }
     }
 
-    public function extra_tablenav($which) {
-        if ($which == 'top') {
-            $output = '<div class="alignleft actions">';
-            $output .= self::soFilterAll();
-            $output .= self::soFilterSaveBookings();
-            $output .= self::soFilterEventVisited();
-            $output .= '<input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />';
-            $output .= '</div>';
-            echo $output;
+    protected function display_tablenav($which) {
+        ?>
+        <div class="tablenav <?php echo esc_attr($which); ?>">
+            <?php $this->pagination($which); ?>
+    
+            <?php if ($which === 'top'): ?>
+                <div class="alignleft actions bulkactions">
+                    <?php $this->bulk_actions($which); ?>
+                </div>
+                <!-- Deine eigenen Filter hier einfügen -->
+                <div class="alignleft actions">
+                    <?php echo self::soFilterAll(); ?>
+                    <?php echo self::soFilterSaveBookings(); ?>
+                    <?php echo self::soFilterEventVisited(); ?>
+                    <input type="submit" name="so_save_booking_filter_submit" class="button" value="Filtern" />
+                </div>
+            <?php else: ?>
+                <div class="alignleft actions bulkactions">
+                    <?php 
+                    // Hier kannst du entscheiden ob du Bulk-Actions noch mal anzeigen willst
+                    $this->bulk_actions($which); 
+                    ?>
+                </div>
+            <?php endif; ?>
+    
+            <?php $this->extra_tablenav($which); ?>
+            <br class="clear" />
+        </div>
+        <?php
+    }
+
+    protected function bulk_actions($which = '') {
+        $actions = $this->get_bulk_actions();
+        if ( empty( $actions ) ) return;
+    
+        // Wenn oben, dann action
+        $name = ( $which === 'top' ) ? 'action' : 'action2';
+    
+        echo '<select name="' . $name . '" id="bulk-action-selector-' . $which . '">';
+        echo '<option value="-1">' . __( 'Mehrfachaktionen', 'textdomain' ) . '</option>';
+    
+        foreach ( $actions as $action => $title ) {
+            echo '<option value="' . esc_attr( $action ) . '">' . esc_html( $title ) . '</option>';
         }
+    
+        echo '</select>';
+        echo '<input type="submit" id="doaction' . ($which === 'bottom' ? '2' : '') . '" class="button action" value="' . __( 'Übernehmen', 'textdomain' ) . '">';
     }
 
     public function soFilterAll(){
